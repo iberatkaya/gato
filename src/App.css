@@ -54,6 +54,7 @@
   font-size: 1.5rem;
   margin-bottom: 1.5rem;
   text-align: center;
+  color: #1e4230;
 }
 
 .product-selector {
@@ -87,11 +88,11 @@
 }
 
 .order-card {
-  background-color: rgba(255, 255, 255, 0.15);
+  background-color: #ffffff;
   padding: 20px;
   border-radius: 12px;
   margin-bottom: 20px;
-  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .order-item {
@@ -158,12 +159,13 @@
 .order-total {
   margin-top: 20px;
   padding-top: 20px;
-  border-top: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid #e0e0e0;
 }
 
 .order-total h3 {
   font-size: 1.5rem;
   text-align: center;
+  color: #1e4230;
 }
 
 .payment-section {
@@ -172,6 +174,7 @@
 
 .payment-section h4 {
   margin-bottom: 10px;
+  color: #1e4230;
 }
 
 .payment-buttons {
@@ -186,6 +189,9 @@
   border-radius: 8px;
   flex: 1;
   max-width: 200px;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
 }
 
 .payment-button.active {
@@ -194,8 +200,8 @@
 }
 
 .payment-button.inactive {
-  background-color: rgba(255, 255, 255, 0.3);
-  color: white;
+  background-color: #e0e0e0;
+  color: #333;
 }
 
 .payment-button:hover {

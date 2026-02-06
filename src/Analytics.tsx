@@ -85,7 +85,7 @@ export function Analytics({ orders }: AnalyticsProps) {
 
   // Overall statistics - calculate first with defensive checks
   const totalRevenue = orders.reduce((sum, order) => {
-    const orderTotal = typeof order.total === 'number' ? order.total : 0;
+    const orderTotal = typeof order.total === "number" ? order.total : 0;
     return sum + orderTotal;
   }, 0);
   const totalOrders = orders.length;
@@ -95,6 +95,14 @@ export function Analytics({ orders }: AnalyticsProps) {
   const totalCard = orders.filter(
     (order) => order.paymentMethod === "card",
   ).length;
+
+  // Revenue by payment method
+  const cashRevenue = orders
+    .filter((order) => order.paymentMethod === "cash")
+    .reduce((sum, order) => sum + order.total, 0);
+  const cardRevenue = orders
+    .filter((order) => order.paymentMethod === "card")
+    .reduce((sum, order) => sum + order.total, 0);
 
   // Payment method distribution
   const paymentData = [
@@ -125,17 +133,17 @@ export function Analytics({ orders }: AnalyticsProps) {
           <div className="stat-label">Toplam Sipariş</div>
           <div className="stat-value">{totalOrders}</div>
         </div>
-        <div className="stat-card">
+        <div className="stat-card stat-card-large">
           <div className="stat-label">Toplam Gelir</div>
           <div className="stat-value">{totalRevenue} TL</div>
         </div>
         <div className="stat-card">
-          <div className="stat-label">Nakit Siparişler</div>
-          <div className="stat-value">{totalCash}</div>
+          <div className="stat-label">Nakit Gelir</div>
+          <div className="stat-value">{cashRevenue} TL</div>
         </div>
         <div className="stat-card">
-          <div className="stat-label">Kart Siparişler</div>
-          <div className="stat-value">{totalCard}</div>
+          <div className="stat-label">Kart Gelir</div>
+          <div className="stat-value">{cardRevenue} TL</div>
         </div>
       </div>
       {/* Charts Section */}

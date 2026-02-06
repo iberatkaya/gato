@@ -83,8 +83,11 @@ export function Analytics({ orders }: AnalyticsProps) {
     (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
   );
 
-  // Overall statistics - calculate first
-  const totalRevenue = orders.reduce((sum, order) => sum + order.total, 0);
+  // Overall statistics - calculate first with defensive checks
+  const totalRevenue = orders.reduce((sum, order) => {
+    const orderTotal = typeof order.total === 'number' ? order.total : 0;
+    return sum + orderTotal;
+  }, 0);
   const totalOrders = orders.length;
   const totalCash = orders.filter(
     (order) => order.paymentMethod === "cash",

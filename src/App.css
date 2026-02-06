@@ -43,6 +43,16 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
+.toggle-button:not(.active) {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.toggle-button.active {
+  background-color: #2e7d32;
+  border-color: rgba(46, 125, 50, 0.8);
+}
+
 .page-title {
   color: rgba(255, 255, 255, 0.7);
   font-size: 1rem;

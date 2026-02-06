@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import "./App.css";
 import { menuItems } from "./menu";
 import { LoginPage } from "./LoginPage";
+import { Analytics } from "./Analytics";
+import "./Analytics.css";
 import type { MenuItem } from "./menu";
 
 interface OrderItem {
@@ -32,7 +34,7 @@ function App() {
     const savedOrders = localStorage.getItem("orders");
     return savedOrders ? JSON.parse(savedOrders) : [];
   });
-  const [showHistory, setShowHistory] = useState(false);
+  const [view, setView] = useState<"order" | "history" | "analytics">("order");
 
   // Save orders to localStorage whenever they change
   useEffect(() => {
@@ -179,16 +181,37 @@ function App() {
         </div>
       </div>
 
-      <div style={{ marginBottom: "20px", textAlign: "center" }}>
+      <div
+        style={{
+          marginBottom: "20px",
+          textAlign: "center",
+          display: "flex",
+          gap: "10px",
+          justifyContent: "center",
+          flexWrap: "wrap",
+        }}
+      >
         <button
-          onClick={() => setShowHistory(!showHistory)}
-          className="toggle-button"
+          onClick={() => setView("order")}
+          className={`toggle-button ${view === "order" ? "active" : ""}`}
         >
-          {showHistory ? "Yeni Sipariş" : "Sipariş Geçmişi"}
+          Sipariş Oluştur
+        </button>
+        <button
+          onClick={() => setView("history")}
+          className={`toggle-button ${view === "history" ? "active" : ""}`}
+        >
+          Sipariş Geçmişi
+        </button>
+        <button
+          onClick={() => setView("analytics")}
+          className={`toggle-button ${view === "analytics" ? "active" : ""}`}
+        >
+          İstatistikler
         </button>
       </div>
 
-      {!showHistory ? (
+      {view === "order" ? (
         <>
           <h2 className="page-title">Sipariş Ekranı</h2>
 
@@ -271,7 +294,7 @@ function App() {
             </div>
           )}
         </>
-      ) : (
+      ) : view === "history" ? (
         <>
           <h2 className="page-title">Sipariş Geçmişi</h2>
           {orders.length === 0 ? (
@@ -315,6 +338,52 @@ function App() {
             </div>
           )}
         </>
+      ) : view === "history" ? (
+        <>
+          <h2 className="page-title">Sipariş Geçmişi</h2>
+          {orders.length === 0 ? (
+            <p className="empty-state">Henüz sipariş bulunmamaktadır.</p>
+          ) : (
+            <div className="history-list">
+              {orders.map((order) => (
+                <div key={order.id} className="history-item">
+                  <div className="history-header">
+                    <div>
+                      <strong>Tarih:</strong> {order.date}
+                    </div>
+                    <div>
+                      <strong>Ödeme:</strong>{" "}
+                      {order.paymentMethod === "cash" ? "Nakit" : "Kart"}
+                    </div>
+                  </div>
+
+                  <div className="history-items">
+                    {order.items.map((item, index) => (
+                      <div key={index} className="history-item-row">
+                        {item.quantity}x {item.product} -{" "}
+                        {item.price * item.quantity} TL
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="history-footer">
+                    <strong className="history-total">
+                      Toplam: {order.total} TL
+                    </strong>
+                    <button
+                      onClick={() => deleteOrder(order.id)}
+                      className="delete-button"
+                    >
+                      Sil
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </>
+      ) : (
+        <Analytics orders={orders} />
       )}
     </div>
   );

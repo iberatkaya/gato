@@ -32,7 +32,14 @@ function App() {
   const [paymentMethod, setPaymentMethod] = useState<"cash" | "card">("cash");
   const [orders, setOrders] = useState<Order[]>(() => {
     const savedOrders = localStorage.getItem("orders");
-    return savedOrders ? JSON.parse(savedOrders) : [];
+    if (!savedOrders) return [];
+
+    const parsed = JSON.parse(savedOrders);
+    // Normalize old orders with timestamps to date-only format
+    return parsed.map((order: Order) => ({
+      ...order,
+      date: order.date.split(" ")[0], // Extract just the date part if there's a timestamp
+    }));
   });
   const [view, setView] = useState<"order" | "history" | "analytics">("order");
 

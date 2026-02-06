@@ -151,6 +151,16 @@ export const menuItems: MenuItem[] = [
         "price": 180
     },
     {
+        "category": "Özel İçecek",
+        "product": "Su",
+        "price": 50
+    },
+    {
+        "category": "Özel İçecek",
+        "product": "Soda",
+        "price": 65
+    },
+    {
         "category": "Tatlı",
         "product": "Cookie",
         "price": 195

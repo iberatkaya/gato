@@ -13,9 +13,41 @@
   margin-bottom: 2rem;
 }
 
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+}
+
 .header h1 {
   font-size: 2.5rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0;
+  flex: 1;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  white-space: nowrap;
+}
+
+.header-user {
+  font-size: 0.95rem;
+  opacity: 0.9;
+}
+
+.logout-button {
+  padding: 8px 16px;
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s;
 }
 
 .toggle-button {
@@ -317,4 +349,103 @@
   color: rgba(255, 255, 255, 0.7);
   padding: 40px;
   font-size: 1.1rem;
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 640px) {
+  #root {
+    padding: 1rem;
+  }
+
+  .header {
+    margin-bottom: 1.5rem;
+  }
+
+  .header-content {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .header h1 {
+    font-size: 1.8rem;
+    margin-bottom: 0;
+  }
+
+  .header-actions {
+    width: 100%;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .header-user {
+    font-size: 0.85rem;
+  }
+
+  .logout-button {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+  }
+
+  .product-selector {
+    flex-direction: column;
+  }
+
+  .product-selector select {
+    min-width: 100%;
+    width: 100%;
+  }
+
+  .add-button {
+    width: 100%;
+  }
+
+  .order-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .order-item-name {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+
+  .order-item-controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .item-price {
+    min-width: auto;
+    flex: 1;
+    text-align: right;
+  }
+
+  .payment-buttons {
+    flex-direction: column;
+  }
+
+  .payment-button {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .history-header {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .history-footer {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .section-title {
+    font-size: 1.2rem;
+  }
+
+  .page-title {
+    font-size: 0.9rem;
+  }
 }

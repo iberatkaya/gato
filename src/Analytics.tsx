@@ -34,7 +34,7 @@ export function Analytics({ orders }: AnalyticsProps) {
   // Group orders by day
   const ordersByDay = orders.reduce(
     (acc, order) => {
-      const dateOnly = order.date.split(",")[0];
+      const dateOnly = order.date;
       if (!acc[dateOnly]) {
         acc[dateOnly] = [];
       }

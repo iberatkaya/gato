@@ -94,7 +94,7 @@ function App() {
       items: [...currentOrder],
       total: calculateTotal(),
       paymentMethod,
-      date: new Date().toLocaleString("tr-TR"),
+      date: new Date().toLocaleDateString("tr-TR"),
     };
 
     setOrders([newOrder, ...orders]);
@@ -141,31 +141,13 @@ function App() {
   return (
     <div className="app-container">
       <div className="header">
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
+        <div className="header-content">
           <h1>Gato Coffee Bar</h1>
-          <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
-            <span style={{ fontSize: "0.95rem", opacity: 0.9 }}>
-              👤 {currentUser}
-            </span>
+          <div className="header-actions">
+            <span className="header-user">👤 {currentUser}</span>
             <button
               onClick={handleLogout}
-              style={{
-                padding: "8px 16px",
-                backgroundColor: "rgba(255, 255, 255, 0.2)",
-                color: "white",
-                border: "none",
-                borderRadius: "6px",
-                cursor: "pointer",
-                fontSize: "0.9rem",
-                fontWeight: "500",
-                transition: "all 0.2s",
-              }}
+              className="logout-button"
               onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor =
                   "rgba(255, 255, 255, 0.3)";
@@ -291,50 +273,6 @@ function App() {
               <button onClick={placeOrder} className="submit-button">
                 Siparişi Tamamla
               </button>
-            </div>
-          )}
-        </>
-      ) : view === "history" ? (
-        <>
-          <h2 className="page-title">Sipariş Geçmişi</h2>
-          {orders.length === 0 ? (
-            <p className="empty-state">Henüz sipariş bulunmamaktadır.</p>
-          ) : (
-            <div className="history-list">
-              {orders.map((order) => (
-                <div key={order.id} className="history-item">
-                  <div className="history-header">
-                    <div>
-                      <strong>Tarih:</strong> {order.date}
-                    </div>
-                    <div>
-                      <strong>Ödeme:</strong>{" "}
-                      {order.paymentMethod === "cash" ? "Nakit" : "Kart"}
-                    </div>
-                  </div>
-
-                  <div className="history-items">
-                    {order.items.map((item, index) => (
-                      <div key={index} className="history-item-row">
-                        {item.quantity}x {item.product} -{" "}
-                        {item.price * item.quantity} TL
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="history-footer">
-                    <strong className="history-total">
-                      Toplam: {order.total} TL
-                    </strong>
-                    <button
-                      onClick={() => deleteOrder(order.id)}
-                      className="delete-button"
-                    >
-                      Sil
-                    </button>
-                  </div>
-                </div>
-              ))}
             </div>
           )}
         </>

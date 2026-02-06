@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import "./App.css";
 import { menuItems } from "./menu";
+import { LoginPage } from "./LoginPage";
 import type { MenuItem } from "./menu";
 
 interface OrderItem {
@@ -18,6 +19,12 @@ interface Order {
 }
 
 function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return !!localStorage.getItem("auth_token");
+  });
+  const [currentUser, setCurrentUser] = useState(() => {
+    return localStorage.getItem("current_user") || "";
+  });
   const [currentOrder, setCurrentOrder] = useState<OrderItem[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<string>("");
   const [paymentMethod, setPaymentMethod] = useState<"cash" | "card">("cash");
@@ -109,10 +116,65 @@ function App() {
     {} as Record<string, MenuItem[]>,
   );
 
+  const handleLogin = (username: string) => {
+    localStorage.setItem("auth_token", "true");
+    localStorage.setItem("current_user", username);
+    setIsAuthenticated(true);
+    setCurrentUser(username);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("auth_token");
+    localStorage.removeItem("current_user");
+    setIsAuthenticated(false);
+    setCurrentUser("");
+  };
+
+  if (!isAuthenticated) {
+    return <LoginPage onLogin={handleLogin} />;
+  }
+
   return (
     <div className="app-container">
       <div className="header">
-        <h1>Gato Coffee Bar</h1>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <h1>Gato Coffee Bar</h1>
+          <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
+            <span style={{ fontSize: "0.95rem", opacity: 0.9 }}>
+              👤 {currentUser}
+            </span>
+            <button
+              onClick={handleLogout}
+              style={{
+                padding: "8px 16px",
+                backgroundColor: "rgba(255, 255, 255, 0.2)",
+                color: "white",
+                border: "none",
+                borderRadius: "6px",
+                cursor: "pointer",
+                fontSize: "0.9rem",
+                fontWeight: "500",
+                transition: "all 0.2s",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor =
+                  "rgba(255, 255, 255, 0.3)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor =
+                  "rgba(255, 255, 255, 0.2)";
+              }}
+            >
+              Çıkış Yap
+            </button>
+          </div>
+        </div>
       </div>
 
       <div style={{ marginBottom: "20px", textAlign: "center" }}>

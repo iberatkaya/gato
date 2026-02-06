@@ -1,0 +1,266 @@
+#root {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.app-container {
+  color: #ffffff;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.header h1 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.toggle-button {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.toggle-button:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+.page-title {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1rem;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.section-title {
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.product-selector {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.product-selector select {
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  background-color: rgba(255, 255, 255, 0.95);
+  color: #2d5f3f;
+  font-size: 1rem;
+  min-width: 300px;
+  font-weight: 500;
+}
+
+.add-button {
+  background-color: rgba(255, 255, 255, 0.95);
+  color: #2d5f3f;
+  padding: 12px 24px;
+  font-weight: 600;
+}
+
+.add-button:hover {
+  background-color: #ffffff;
+}
+
+.order-card {
+  background-color: rgba(255, 255, 255, 0.15);
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  backdrop-filter: blur(10px);
+}
+
+.order-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background-color: rgba(255, 255, 255, 0.95);
+  color: #2d5f3f;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.order-item-name {
+  flex: 1;
+  text-align: left;
+}
+
+.order-item-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.quantity-button {
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-weight: 600;
+  color: white;
+  min-width: 36px;
+}
+
+.quantity-button.minus {
+  background-color: #c62828;
+}
+
+.quantity-button.minus:hover {
+  background-color: #b71c1c;
+}
+
+.quantity-button.plus {
+  background-color: #2e7d32;
+}
+
+.quantity-button.plus:hover {
+  background-color: #1b5e20;
+}
+
+.quantity-display {
+  min-width: 30px;
+  text-align: center;
+  font-weight: 600;
+  color: #2d5f3f;
+}
+
+.item-price {
+  min-width: 80px;
+  text-align: right;
+  font-weight: 600;
+  color: #2d5f3f;
+}
+
+.order-total {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.order-total h3 {
+  font-size: 1.5rem;
+  text-align: center;
+}
+
+.payment-section {
+  margin-top: 20px;
+}
+
+.payment-section h4 {
+  margin-bottom: 10px;
+}
+
+.payment-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.payment-button {
+  padding: 12px 24px;
+  font-weight: 600;
+  border-radius: 8px;
+  flex: 1;
+  max-width: 200px;
+}
+
+.payment-button.active {
+  background-color: #2e7d32;
+  color: white;
+}
+
+.payment-button.inactive {
+  background-color: rgba(255, 255, 255, 0.3);
+  color: white;
+}
+
+.payment-button:hover {
+  opacity: 0.9;
+}
+
+.submit-button {
+  margin-top: 20px;
+  padding: 16px 32px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  background-color: #1976d2;
+  color: white;
+  border-radius: 8px;
+  width: 100%;
+}
+
+.submit-button:hover {
+  background-color: #1565c0;
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.history-item {
+  background-color: rgba(255, 255, 255, 0.15);
+  padding: 20px;
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.history-items {
+  margin-bottom: 15px;
+}
+
+.history-item-row {
+  padding: 8px 0;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.history-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 15px;
+  border-top: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.history-total {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.delete-button {
+  background-color: #c62828;
+  color: white;
+  padding: 8px 20px;
+  font-weight: 600;
+}
+
+.delete-button:hover {
+  background-color: #b71c1c;
+}
+
+.empty-state {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.7);
+  padding: 40px;
+  font-size: 1.1rem;
+}

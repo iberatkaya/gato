@@ -46,7 +46,7 @@ export function Analytics({ orders }: AnalyticsProps) {
 
   // Calculate daily statistics
   const dailyStats = Object.entries(ordersByDay)
-    .sort((a, b) => new Date(b[0]).getTime() - new Date(a[0]).getTime())
+    .sort((a, b) => new Date(a[0]).getTime() - new Date(b[0]).getTime())
     .map(([date, dayOrders]) => {
       const totalRevenue = dayOrders.reduce(
         (sum, order) => sum + order.total,
@@ -77,6 +77,11 @@ export function Analytics({ orders }: AnalyticsProps) {
           .sort((a, b) => b.quantity - a.quantity),
       };
     });
+
+  // Chart data - sorted chronologically for the chart display
+  const chartData = [...dailyStats].sort(
+    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+  );
 
   // Overall statistics - calculate first
   const totalRevenue = orders.reduce((sum, order) => sum + order.total, 0);
@@ -111,7 +116,6 @@ export function Analytics({ orders }: AnalyticsProps) {
   return (
     <div className="analytics-container">
       <h2 className="page-title">Analytics & İstatistikler</h2>
-
       {/* Overall Stats Cards */}
       <div className="stats-grid">
         <div className="stat-card">
@@ -131,21 +135,24 @@ export function Analytics({ orders }: AnalyticsProps) {
           <div className="stat-value">{totalCard}</div>
         </div>
       </div>
-
       {/* Charts Section */}
       {orders.length > 0 && (
         <div className="charts-section">
           <div className="chart-container">
             <h3>Günlük Gelir Trendi</h3>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={dailyStats}>
+              <BarChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="date" />
                 <YAxis />
                 <Tooltip />
                 <Legend />
                 <Bar dataKey="totalRevenue" fill="#2e7d32" name="Gelir (TL)" />
-                <Bar dataKey="totalOrders" fill="#1976d2" name="Sipariş Sayısı" />
+                <Bar
+                  dataKey="totalOrders"
+                  fill="#1976d2"
+                  name="Sipariş Sayısı"
+                />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -178,7 +185,12 @@ export function Analytics({ orders }: AnalyticsProps) {
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={topProducts}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="product" angle={-45} textAnchor="end" height={100} />
+                <XAxis
+                  dataKey="product"
+                  angle={-45}
+                  textAnchor="end"
+                  height={100}
+                />
                 <YAxis />
                 <Tooltip />
                 <Bar dataKey="quantity" fill="#ff9800" name="Miktar" />
@@ -186,7 +198,8 @@ export function Analytics({ orders }: AnalyticsProps) {
             </ResponsiveContainer>
           </div>
         </div>
-      )}      {/* Daily Breakdown */}
+      )}{" "}
+      {/* Daily Breakdown */}
       {dailyStats.length === 0 ? (
         <p className="empty-state">Henüz sipariş bulunmamaktadır.</p>
       ) : (

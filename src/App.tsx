@@ -101,7 +101,9 @@ function App() {
   };
 
   const deleteOrder = (orderId: string) => {
-    setOrders(orders.filter((order) => order.id !== orderId));
+    if (window.confirm("Bu siparişi silmek istediğinizden emin misiniz?")) {
+      setOrders(orders.filter((order) => order.id !== orderId));
+    }
   };
 
   // Group menu items by category

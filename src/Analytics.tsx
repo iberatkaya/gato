@@ -96,6 +96,14 @@ export function Analytics({ orders }: AnalyticsProps) {
     (order) => order.paymentMethod === "card",
   ).length;
 
+  // Today's statistics
+  const today = new Date().toISOString().split("T")[0];
+  const todaysOrders = orders.filter((order) => order.date === today);
+  const todaysRevenue = todaysOrders.reduce(
+    (sum, order) => sum + order.total,
+    0,
+  );
+
   // Revenue by payment method
   const cashRevenue = orders
     .filter((order) => order.paymentMethod === "cash")
@@ -129,6 +137,10 @@ export function Analytics({ orders }: AnalyticsProps) {
       <h2 className="page-title">Analytics & İstatistikler</h2>
       {/* Overall Stats Cards */}
       <div className="stats-grid">
+        <div className="stat-card">
+          <div className="stat-label">Bugünkü Gelir</div>
+          <div className="stat-value">{todaysRevenue} TL</div>
+        </div>
         <div className="stat-card">
           <div className="stat-label">Toplam Sipariş</div>
           <div className="stat-value">{totalOrders}</div>

@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import "./App.css";
 import { menuItems } from "./menu";
 import { LoginPage } from "./LoginPage";
 import { Analytics } from "./Analytics";
 import "./Analytics.css";
+import { useFirestoreOrders } from "./useFirestoreOrders";
 import type { MenuItem } from "./menu";
 
 interface OrderItem {
@@ -30,23 +31,18 @@ function App() {
   const [currentOrder, setCurrentOrder] = useState<OrderItem[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<string>("");
   const [paymentMethod, setPaymentMethod] = useState<"cash" | "card">("cash");
-  const [orders, setOrders] = useState<Order[]>(() => {
-    const savedOrders = localStorage.getItem("orders");
-    if (!savedOrders) return [];
 
-    const parsed = JSON.parse(savedOrders);
-    // Normalize old orders with timestamps to date-only format
-    return parsed.map((order: Order) => ({
-      ...order,
-      date: order.date.split(" ")[0], // Extract just the date part if there's a timestamp
-    }));
-  });
+  // Use Firestore hook for orders management with localStorage fallback
+  const {
+    orders,
+    loading: firestoreLoading,
+    error: firestoreError,
+    addNewOrder,
+    removeOrder,
+    isFirestoreEnabled,
+  } = useFirestoreOrders();
+
   const [view, setView] = useState<"order" | "history" | "analytics">("order");
-
-  // Save orders to localStorage whenever they change
-  useEffect(() => {
-    localStorage.setItem("orders", JSON.stringify(orders));
-  }, [orders]);
 
   const addProductToOrder = () => {
     if (!selectedProduct) return;
@@ -93,25 +89,34 @@ function App() {
     );
   };
 
-  const placeOrder = () => {
+  const placeOrder = async () => {
     if (currentOrder.length === 0) return;
 
-    const newOrder: Order = {
-      id: Date.now().toString(),
-      items: [...currentOrder],
-      total: calculateTotal(),
-      paymentMethod,
-      date: new Date().toLocaleDateString("tr-TR"),
-    };
+    try {
+      const newOrder: Omit<Order, "id"> = {
+        items: [...currentOrder],
+        total: calculateTotal(),
+        paymentMethod,
+        date: new Date().toLocaleDateString("tr-TR"),
+      };
 
-    setOrders([newOrder, ...orders]);
-    setCurrentOrder([]);
-    alert("Sipariş başarıyla kaydedildi!");
+      await addNewOrder(newOrder);
+      setCurrentOrder([]);
+      alert("Sipariş başarıyla kaydedildi!");
+    } catch (error) {
+      console.error("Error placing order:", error);
+      alert("Sipariş kaydedilirken hata oluştu. Lütfen tekrar deneyin.");
+    }
   };
 
-  const deleteOrder = (orderId: string) => {
+  const deleteOrder = async (orderId: string) => {
     if (window.confirm("Bu siparişi silmek istediğinizden emin misiniz?")) {
-      setOrders(orders.filter((order) => order.id !== orderId));
+      try {
+        await removeOrder(orderId);
+      } catch (error) {
+        console.error("Error deleting order:", error);
+        alert("Sipariş silinirken hata oluştu. Lütfen tekrar deneyin.");
+      }
     }
   };
 
@@ -152,6 +157,14 @@ function App() {
           <h1>Gato Coffee Bar</h1>
           <div className="header-actions">
             <span className="header-user">👤 {currentUser}</span>
+            {isFirestoreEnabled && (
+              <span
+                className="firestore-indicator"
+                title="Using Firebase Firestore"
+              >
+                ☁️ Cloud
+              </span>
+            )}
             <button
               onClick={handleLogout}
               className="logout-button"
@@ -169,6 +182,21 @@ function App() {
           </div>
         </div>
       </div>
+
+      {firestoreError && (
+        <div
+          style={{
+            backgroundColor: "#fee",
+            color: "#c00",
+            padding: "10px",
+            marginBottom: "10px",
+            borderRadius: "4px",
+            textAlign: "center",
+          }}
+        >
+          ⚠️ {firestoreError}
+        </div>
+      )}
 
       <div
         style={{
@@ -277,8 +305,12 @@ function App() {
                 </div>
               </div>
 
-              <button onClick={placeOrder} className="submit-button">
-                Siparişi Tamamla
+              <button
+                onClick={placeOrder}
+                className="submit-button"
+                disabled={firestoreLoading}
+              >
+                {firestoreLoading ? "İşleniyor..." : "Siparişi Tamamla"}
               </button>
             </div>
           )}

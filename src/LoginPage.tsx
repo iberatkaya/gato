@@ -81,18 +81,6 @@ export function LoginPage({ onLogin }: LoginPageProps) {
             Giriş Yap
           </button>
         </form>
-
-        <div className="demo-credentials">
-          <p style={{ marginBottom: "8px", fontSize: "0.9rem", opacity: 0.7 }}>
-            Demo Hesapları:
-          </p>
-          <p style={{ fontSize: "0.85rem", margin: "4px 0" }}>
-            👤 admin / 📍 123456
-          </p>
-          <p style={{ fontSize: "0.85rem", margin: "4px 0" }}>
-            👤 manager / 📍 654321
-          </p>
-        </div>
       </div>
     </div>
   );

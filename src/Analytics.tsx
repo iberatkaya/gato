@@ -27,7 +27,7 @@ export function Analytics() {
   // Date range state
   const [dateRange, setDateRange] = useState<
     "today" | "week" | "month" | "ytd" | "custom"
-  >("week");
+  >("today");
 
   // Set default custom dates to last 90 days
   const getDefaultCustomDates = () => {
@@ -118,6 +118,78 @@ export function Analytics() {
   // Helper function to format currency
   const formatCurrency = (value: number) => {
     return value.toFixed(2);
+  };
+
+  // CSV Export functionality
+  const exportToCSV = () => {
+    const { startDate, endDate } = getDateRange();
+
+    // CSV Header
+    const headers = [
+      "Tarih",
+      "Toplam Sipariş",
+      "Toplam Gelir (TL)",
+      "Nakit Sipariş",
+      "Nakit Gelir (TL)",
+      "Kart Sipariş",
+      "Kart Gelir (TL)",
+      "En Çok Satılan Ürünler",
+    ];
+
+    // CSV Rows
+    const rows = dailyAggregates.map((day) => {
+      const topItems = Object.entries(day.itemCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5)
+        .map(([product, quantity]) => `${product} (${quantity})`)
+        .join("; ");
+
+      return [
+        day.date,
+        day.totalOrders,
+        formatCurrency(day.totalRevenue),
+        day.cashOrders,
+        formatCurrency(day.cashRevenue),
+        day.cardOrders,
+        formatCurrency(day.cardRevenue),
+        topItems,
+      ];
+    });
+
+    // Add summary row
+    const summaryRow = [
+      "TOPLAM",
+      totalOrders,
+      formatCurrency(totalRevenue),
+      totalCash,
+      formatCurrency(cashRevenue),
+      totalCard,
+      formatCurrency(cardRevenue),
+      "",
+    ];
+
+    // Combine headers and rows
+    const csvContent = [
+      headers.join(","),
+      ...rows.map((row) => row.map((cell) => `"${cell}"`).join(",")),
+      summaryRow.map((cell) => `"${cell}"`).join(","),
+    ].join("\n");
+
+    // Add BOM for proper UTF-8 encoding in Excel
+    const BOM = "\uFEFF";
+    const blob = new Blob([BOM + csvContent], {
+      type: "text/csv;charset=utf-8;",
+    });
+    const url = URL.createObjectURL(blob);
+
+    // Create download link
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `gato-analytics-${startDate}-${endDate}.csv`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   // Calculate overall statistics from aggregates
@@ -304,6 +376,15 @@ export function Analytics() {
             </label>
           </div>
         )}
+
+        {/* Export Button */}
+        <button
+          className="export-btn"
+          onClick={exportToCSV}
+          disabled={dailyAggregates.length === 0}
+        >
+          📊 CSV İndir
+        </button>
       </div>
       {loading && <div className="loading-state">Yükleniyor...</div>}
       {error && <div className="error-state">{error}</div>}

@@ -136,25 +136,40 @@ export function Analytics() {
       "En Çok Satılan Ürünler",
     ];
 
-    // CSV Rows
-    const rows = dailyAggregates.map((day) => {
-      const topItems = Object.entries(day.itemCounts)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 5)
-        .map(([product, quantity]) => `${product} (${quantity})`)
-        .join("; ");
+    // Create a map of existing data
+    const dataMap = new Map(dailyAggregates.map((day) => [day.date, day]));
 
-      return [
-        day.date,
-        day.totalOrders,
-        formatCurrency(day.totalRevenue),
-        day.cashOrders,
-        formatCurrency(day.cashRevenue),
-        day.cardOrders,
-        formatCurrency(day.cardRevenue),
+    // Generate all dates in range
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const rows: Array<Array<string | number>> = [];
+    const currentDate = new Date(start);
+
+    while (currentDate <= end) {
+      const dateStr = currentDate.toISOString().split("T")[0];
+      const existingData = dataMap.get(dateStr);
+
+      const topItems = existingData
+        ? Object.entries(existingData.itemCounts)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 5)
+            .map(([product, quantity]) => `${product} (${quantity})`)
+            .join("; ")
+        : "";
+
+      rows.push([
+        dateStr,
+        existingData?.totalOrders || 0,
+        formatCurrency(existingData?.totalRevenue || 0),
+        existingData?.cashOrders || 0,
+        formatCurrency(existingData?.cashRevenue || 0),
+        existingData?.cardOrders || 0,
+        formatCurrency(existingData?.cardRevenue || 0),
         topItems,
-      ];
-    });
+      ]);
+
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
 
     // Add summary row
     const summaryRow = [

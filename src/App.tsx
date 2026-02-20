@@ -97,7 +97,7 @@ function App() {
         items: [...currentOrder],
         total: calculateTotal(),
         paymentMethod,
-        date: new Date().toLocaleDateString("tr-TR"),
+        date: new Date().toISOString().split("T")[0],
       };
 
       await addNewOrder(newOrder);
@@ -360,7 +360,7 @@ function App() {
           )}
         </>
       ) : (
-        <Analytics orders={orders} />
+        <Analytics />
       )}
     </div>
   );

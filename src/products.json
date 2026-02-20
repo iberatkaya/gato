@@ -173,5 +173,40 @@
         "category": "Tatlı",
         "product": "Indirimli Kek",
         "price": 220
+    },
+    {
+        "category": "Paket Kahve",
+        "product": "100 Gr Türk Kahvesi",
+        "price": 150
+    },
+    {
+        "category": "Paket Kahve",
+        "product": "250 Gr Türk Kahvesi",
+        "price": 300
+    },
+    {
+        "category": "Paket Kahve",
+        "product": "Bonita",
+        "price": 1000
+    },
+    {
+        "category": "Paket Kahve",
+        "product": "Indonesia",
+        "price": 900
+    },
+    {
+        "category": "Paket Kahve",
+        "product": "Colombia",
+        "price": 550
+    },
+    {
+        "category": "Paket Kahve",
+        "product": "Rwanda",
+        "price": 550
+    },
+    {
+        "category": "Paket Kahve",
+        "product": "Ethiopia",
+        "price": 600
     }
 ]

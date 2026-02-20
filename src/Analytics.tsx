@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import {
   BarChart,
   Bar,
@@ -11,106 +12,174 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
+import { useAnalyticsAggregates } from "./useAnalyticsOrders";
+import "./Analytics.css";
 
-interface OrderItem {
-  product: string;
-  price: number;
-  quantity: number;
-}
+export function Analytics() {
+  const {
+    dailyAggregates,
+    loading,
+    error,
+    fetchAggregatesForRange,
+    isFirestoreEnabled,
+  } = useAnalyticsAggregates();
 
-interface Order {
-  id: string;
-  items: OrderItem[];
-  total: number;
-  paymentMethod: "cash" | "card";
-  date: string;
-}
+  // Date range state
+  const [dateRange, setDateRange] = useState<
+    "today" | "week" | "month" | "ytd" | "custom"
+  >("week");
 
-interface AnalyticsProps {
-  orders: Order[];
-}
+  // Set default custom dates to last 90 days
+  const getDefaultCustomDates = () => {
+    const today = new Date();
+    const startDate = new Date(today);
+    startDate.setDate(today.getDate() - 89); // 90 days including today
+    return {
+      start: startDate.toISOString().split("T")[0],
+      end: today.toISOString().split("T")[0],
+    };
+  };
 
-export function Analytics({ orders }: AnalyticsProps) {
-  // Group orders by day
-  const ordersByDay = orders.reduce(
-    (acc, order) => {
-      const dateOnly = order.date;
-      if (!acc[dateOnly]) {
-        acc[dateOnly] = [];
+  const defaultDates = getDefaultCustomDates();
+  const [customStartDate, setCustomStartDate] = useState(defaultDates.start);
+  const [customEndDate, setCustomEndDate] = useState(defaultDates.end);
+
+  // Calculate date range
+  const getDateRange = (): { startDate: string; endDate: string } => {
+    // Use the same date calculation as when creating orders
+    const todayStr = new Date().toISOString().split("T")[0];
+    const today = new Date(todayStr + "T00:00:00");
+
+    let startDate = new Date(today);
+    const endDate = new Date(today);
+
+    switch (dateRange) {
+      case "today":
+        // Today only
+        break;
+      case "week":
+        // Last 7 days
+        startDate.setDate(today.getDate() - 6);
+        break;
+      case "month":
+        // Last 30 days
+        startDate.setDate(today.getDate() - 29);
+        break;
+      case "ytd": {
+        // Year-to-date (January 1 to today)
+        const yearStart = new Date(today.getFullYear(), 0, 1);
+        return {
+          startDate: yearStart.toISOString().split("T")[0],
+          endDate: endDate.toISOString().split("T")[0],
+        };
       }
-      acc[dateOnly].push(order);
-      return acc;
-    },
-    {} as Record<string, Order[]>,
-  );
+      case "custom": {
+        if (customStartDate && customEndDate) {
+          return {
+            startDate: customStartDate,
+            endDate: customEndDate,
+          };
+        }
+        // Fallback to last 90 days if custom dates not set
+        const fallbackStart = new Date(today);
+        fallbackStart.setDate(today.getDate() - 89);
+        return {
+          startDate: fallbackStart.toISOString().split("T")[0],
+          endDate: endDate.toISOString().split("T")[0],
+        };
+      }
+    }
 
-  // Calculate daily statistics
-  const dailyStats = Object.entries(ordersByDay)
-    .sort((a, b) => new Date(a[0]).getTime() - new Date(b[0]).getTime())
-    .map(([date, dayOrders]) => {
-      const totalRevenue = dayOrders.reduce(
-        (sum, order) => sum + order.total,
-        0,
-      );
-      const cashOrders = dayOrders.filter(
-        (order) => order.paymentMethod === "cash",
-      ).length;
-      const cardOrders = dayOrders.filter(
-        (order) => order.paymentMethod === "card",
-      ).length;
+    return {
+      startDate: startDate.toISOString().split("T")[0],
+      endDate: endDate.toISOString().split("T")[0],
+    };
+  };
 
-      const items: Record<string, number> = {};
-      dayOrders.forEach((order) => {
-        order.items.forEach((item) => {
-          items[item.product] = (items[item.product] || 0) + item.quantity;
-        });
-      });
+  // Fetch data when date range changes
+  useEffect(() => {
+    if (isFirestoreEnabled) {
+      const { startDate, endDate } = getDateRange();
+      fetchAggregatesForRange(startDate, endDate);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dateRange, customStartDate, customEndDate, isFirestoreEnabled]);
 
-      return {
-        date,
-        totalOrders: dayOrders.length,
-        totalRevenue,
-        cashOrders,
-        cardOrders,
-        items: Object.entries(items)
-          .map(([product, quantity]) => ({ product, quantity }))
-          .sort((a, b) => b.quantity - a.quantity),
-      };
+  // Helper function to format date for display
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("tr-TR", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
+  };
 
-  // Chart data - sorted chronologically for the chart display
-  const chartData = [...dailyStats].sort(
-    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+  // Helper function to format currency
+  const formatCurrency = (value: number) => {
+    return value.toFixed(2);
+  };
+
+  // Calculate overall statistics from aggregates
+  const totalRevenue = dailyAggregates.reduce(
+    (sum, day) => sum + day.totalRevenue,
+    0,
   );
-
-  // Overall statistics - calculate first with defensive checks
-  const totalRevenue = orders.reduce((sum, order) => {
-    const orderTotal = typeof order.total === "number" ? order.total : 0;
-    return sum + orderTotal;
-  }, 0);
-  const totalOrders = orders.length;
-  const totalCash = orders.filter(
-    (order) => order.paymentMethod === "cash",
-  ).length;
-  const totalCard = orders.filter(
-    (order) => order.paymentMethod === "card",
-  ).length;
-
-  // Today's statistics
-  const today = new Date().toISOString().split("T")[0];
-  const todaysOrders = orders.filter((order) => order.date === today);
-  const todaysRevenue = todaysOrders.reduce(
-    (sum, order) => sum + order.total,
+  const totalOrders = dailyAggregates.reduce(
+    (sum, day) => sum + day.totalOrders,
+    0,
+  );
+  const cashRevenue = dailyAggregates.reduce(
+    (sum, day) => sum + day.cashRevenue,
+    0,
+  );
+  const cardRevenue = dailyAggregates.reduce(
+    (sum, day) => sum + day.cardRevenue,
+    0,
+  );
+  const totalCash = dailyAggregates.reduce(
+    (sum, day) => sum + day.cashOrders,
+    0,
+  );
+  const totalCard = dailyAggregates.reduce(
+    (sum, day) => sum + day.cardOrders,
     0,
   );
 
-  // Revenue by payment method
-  const cashRevenue = orders
-    .filter((order) => order.paymentMethod === "cash")
-    .reduce((sum, order) => sum + order.total, 0);
-  const cardRevenue = orders
-    .filter((order) => order.paymentMethod === "card")
-    .reduce((sum, order) => sum + order.total, 0);
+  // Chart data - fill in missing dates for continuous display
+  const getChartData = () => {
+    const { startDate, endDate } = getDateRange();
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    // Create a map of existing data
+    const dataMap = new Map(dailyAggregates.map((day) => [day.date, day]));
+
+    // Generate all dates in range
+    const allDates: Array<{
+      date: string;
+      totalRevenue: number;
+      totalOrders: number;
+    }> = [];
+    const currentDate = new Date(start);
+
+    while (currentDate <= end) {
+      const dateStr = currentDate.toISOString().split("T")[0];
+      const existingData = dataMap.get(dateStr);
+
+      allDates.push({
+        date: dateStr,
+        totalRevenue: existingData?.totalRevenue || 0,
+        totalOrders: existingData?.totalOrders || 0,
+      });
+
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    return allDates;
+  };
+
+  const chartData = getChartData();
 
   // Payment method distribution
   const paymentData = [
@@ -118,12 +187,11 @@ export function Analytics({ orders }: AnalyticsProps) {
     { name: "Kart", value: totalCard, fill: "#2196f3" },
   ];
 
-  // Top products
+  // Top products from aggregates
   const allProducts: Record<string, number> = {};
-  orders.forEach((order) => {
-    order.items.forEach((item) => {
-      allProducts[item.product] =
-        (allProducts[item.product] || 0) + item.quantity;
+  dailyAggregates.forEach((day) => {
+    Object.entries(day.itemCounts).forEach(([product, quantity]) => {
+      allProducts[product] = (allProducts[product] || 0) + quantity;
     });
   });
 
@@ -135,31 +203,131 @@ export function Analytics({ orders }: AnalyticsProps) {
   return (
     <div className="analytics-container">
       <h2 className="page-title">Analytics & İstatistikler</h2>
+      {/* Date Range Filter */}
+      <div className="date-filter-container">
+        <div className="filter-buttons">
+          <button
+            className={`filter-btn ${dateRange === "today" ? "active" : ""}`}
+            onClick={() => setDateRange("today")}
+          >
+            Bugün
+          </button>
+          <button
+            className={`filter-btn ${dateRange === "week" ? "active" : ""}`}
+            onClick={() => setDateRange("week")}
+          >
+            Son 7 Gün
+          </button>
+          <button
+            className={`filter-btn ${dateRange === "month" ? "active" : ""}`}
+            onClick={() => setDateRange("month")}
+          >
+            Son 30 Gün
+          </button>
+          <button
+            className={`filter-btn ${dateRange === "ytd" ? "active" : ""}`}
+            onClick={() => setDateRange("ytd")}
+          >
+            Bu Yıl
+          </button>
+          <button
+            className={`filter-btn ${dateRange === "custom" ? "active" : ""}`}
+            onClick={() => setDateRange("custom")}
+          >
+            Özel Tarih
+          </button>
+        </div>
+
+        {dateRange === "custom" && (
+          <div className="custom-date-inputs">
+            <label>
+              Başlangıç:
+              <input
+                type="date"
+                value={customStartDate}
+                onChange={(e) => {
+                  const newStartDate = e.target.value;
+                  setCustomStartDate(newStartDate);
+
+                  // Validate 186-day maximum
+                  if (customEndDate && newStartDate) {
+                    const start = new Date(newStartDate);
+                    const end = new Date(customEndDate);
+                    const diffDays = Math.floor(
+                      (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24),
+                    );
+
+                    if (diffDays > 185) {
+                      alert(
+                        "Maksimum 186 günlük tarih aralığı seçebilirsiniz.",
+                      );
+                      // Set end date to 185 days from start
+                      const maxEndDate = new Date(start);
+                      maxEndDate.setDate(start.getDate() + 185);
+                      setCustomEndDate(maxEndDate.toISOString().split("T")[0]);
+                    }
+                  }
+                }}
+              />
+            </label>
+            <label>
+              Bitiş:
+              <input
+                type="date"
+                value={customEndDate}
+                onChange={(e) => {
+                  const newEndDate = e.target.value;
+                  setCustomEndDate(newEndDate);
+
+                  // Validate 186-day maximum
+                  if (customStartDate && newEndDate) {
+                    const start = new Date(customStartDate);
+                    const end = new Date(newEndDate);
+                    const diffDays = Math.floor(
+                      (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24),
+                    );
+
+                    if (diffDays > 185) {
+                      alert(
+                        "Maksimum 186 günlük tarih aralığı seçebilirsiniz.",
+                      );
+                      // Set start date to 185 days before end
+                      const maxStartDate = new Date(end);
+                      maxStartDate.setDate(end.getDate() - 185);
+                      setCustomStartDate(
+                        maxStartDate.toISOString().split("T")[0],
+                      );
+                    }
+                  }
+                }}
+              />
+            </label>
+          </div>
+        )}
+      </div>
+      {loading && <div className="loading-state">Yükleniyor...</div>}
+      {error && <div className="error-state">{error}</div>}
       {/* Overall Stats Cards */}
       <div className="stats-grid">
-        <div className="stat-card">
-          <div className="stat-label">Bugünkü Gelir</div>
-          <div className="stat-value">{todaysRevenue} TL</div>
-        </div>
         <div className="stat-card">
           <div className="stat-label">Toplam Sipariş</div>
           <div className="stat-value">{totalOrders}</div>
         </div>
         <div className="stat-card stat-card-large">
           <div className="stat-label">Toplam Gelir</div>
-          <div className="stat-value">{totalRevenue} TL</div>
+          <div className="stat-value">{formatCurrency(totalRevenue)} TL</div>
         </div>
         <div className="stat-card">
           <div className="stat-label">Nakit Gelir</div>
-          <div className="stat-value">{cashRevenue} TL</div>
+          <div className="stat-value">{formatCurrency(cashRevenue)} TL</div>
         </div>
         <div className="stat-card">
           <div className="stat-label">Kart Gelir</div>
-          <div className="stat-value">{cardRevenue} TL</div>
+          <div className="stat-value">{formatCurrency(cardRevenue)} TL</div>
         </div>
       </div>
       {/* Charts Section */}
-      {orders.length > 0 && (
+      {dailyAggregates.length > 0 && (
         <div className="charts-section">
           <div className="chart-container">
             <h3>Günlük Gelir Trendi</h3>
@@ -223,46 +391,61 @@ export function Analytics({ orders }: AnalyticsProps) {
         </div>
       )}{" "}
       {/* Daily Breakdown */}
-      {dailyStats.length === 0 ? (
-        <p className="empty-state">Henüz sipariş bulunmamaktadır.</p>
+      {dailyAggregates.length === 0 ? (
+        <p className="empty-state">
+          Seçili tarih aralığında sipariş bulunmamaktadır.
+        </p>
       ) : (
         <div className="daily-stats">
-          {dailyStats.map((day) => (
-            <div key={day.date} className="daily-card">
-              <div className="daily-header">
-                <h3>{day.date}</h3>
-                <div className="daily-summary">
-                  <span className="summary-badge">
-                    {day.totalOrders} sipariş
-                  </span>
-                  <span className="summary-badge revenue">
-                    {day.totalRevenue} TL
-                  </span>
-                </div>
-              </div>
+          {dailyAggregates.map((day) => {
+            const topDayItems = Object.entries(day.itemCounts)
+              .map(([product, quantity]) => ({ product, quantity }))
+              .sort((a, b) => b.quantity - a.quantity)
+              .slice(0, 5);
 
-              <div className="daily-details">
-                <div className="detail-row">
-                  <span>💵 Nakit:</span>
-                  <span className="detail-value">{day.cashOrders}</span>
-                </div>
-                <div className="detail-row">
-                  <span>💳 Kart:</span>
-                  <span className="detail-value">{day.cardOrders}</span>
-                </div>
-              </div>
-
-              <div className="daily-items">
-                <h4>En Çok Satılan Ürünler:</h4>
-                {day.items.slice(0, 5).map((item, index) => (
-                  <div key={index} className="item-row">
-                    <span className="item-name">{item.product}</span>
-                    <span className="item-qty">{item.quantity}x</span>
+            return (
+              <div key={day.date} className="daily-card">
+                <div className="daily-header">
+                  <h3>{formatDate(day.date)}</h3>
+                  <div className="daily-summary">
+                    <span className="summary-badge">
+                      {day.totalOrders} sipariş
+                    </span>
+                    <span className="summary-badge revenue">
+                      {formatCurrency(day.totalRevenue)} TL
+                    </span>
                   </div>
-                ))}
+                </div>
+
+                <div className="daily-details">
+                  <div className="detail-row">
+                    <span>💵 Nakit:</span>
+                    <span className="detail-value">
+                      {day.cashOrders} sipariş (
+                      {formatCurrency(day.cashRevenue)} TL)
+                    </span>
+                  </div>
+                  <div className="detail-row">
+                    <span>💳 Kart:</span>
+                    <span className="detail-value">
+                      {day.cardOrders} sipariş (
+                      {formatCurrency(day.cardRevenue)} TL)
+                    </span>
+                  </div>
+                </div>
+
+                <div className="daily-items">
+                  <h4>En Çok Satılan Ürünler:</h4>
+                  {topDayItems.map((item, index) => (
+                    <div key={index} className="item-row">
+                      <span className="item-name">{item.product}</span>
+                      <span className="item-qty">{item.quantity}x</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

@@ -19,6 +19,7 @@ interface Order {
   total: number;
   paymentMethod: "cash" | "card";
   date: string;
+  note?: string;
 }
 
 function App() {
@@ -31,6 +32,7 @@ function App() {
   const [currentOrder, setCurrentOrder] = useState<OrderItem[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<string>("");
   const [paymentMethod, setPaymentMethod] = useState<"cash" | "card">("cash");
+  const [orderNote, setOrderNote] = useState<string>("");
 
   // Use Firestore hook for orders management with localStorage fallback
   const {
@@ -98,10 +100,12 @@ function App() {
         total: calculateTotal(),
         paymentMethod,
         date: new Date().toISOString().split("T")[0],
+        ...(orderNote.trim() && { note: orderNote.trim() }),
       };
 
       await addNewOrder(newOrder);
       setCurrentOrder([]);
+      setOrderNote("");
       alert("Sipariş başarıyla kaydedildi!");
     } catch (error) {
       console.error("Error placing order:", error);
@@ -286,6 +290,13 @@ function App() {
                 <h3>Toplam: {calculateTotal()} TL</h3>
               </div>
 
+              {/* Display note preview if note exists */}
+              {orderNote.trim() && (
+                <div className="current-order-note">
+                  <strong>Not:</strong> {orderNote}
+                </div>
+              )}
+
               {/* Payment Method */}
               <div className="payment-section">
                 <h4>Ödeme Yöntemi:</h4>
@@ -302,6 +313,27 @@ function App() {
                   >
                     Kart Alındı
                   </button>
+                </div>
+              </div>
+
+              {/* Order Note */}
+              <div className="note-section">
+                <h4>Not (İsteğe Bağlı):</h4>
+                <textarea
+                  value={orderNote}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value.length <= 300) {
+                      setOrderNote(value);
+                    }
+                  }}
+                  placeholder="Sipariş ile ilgili not ekleyebilirsiniz..."
+                  maxLength={300}
+                  rows={3}
+                  className="note-input"
+                />
+                <div className="note-counter">
+                  {orderNote.length}/300 karakter
                 </div>
               </div>
 
@@ -342,6 +374,12 @@ function App() {
                       </div>
                     ))}
                   </div>
+
+                  {order.note && (
+                    <div className="history-note">
+                      <strong>Not:</strong> {order.note}
+                    </div>
+                  )}
 
                   <div className="history-footer">
                     <strong className="history-total">

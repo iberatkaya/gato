@@ -16,6 +16,7 @@ interface Order {
     total: number;
     paymentMethod: "cash" | "card";
     date: string;
+    note?: string;
 }
 
 interface UseFirestoreResult {
@@ -58,6 +59,7 @@ export function useFirestoreOrders(
                             total: order.total,
                             paymentMethod: order.paymentMethod,
                             date: order.date,
+                            ...(order.note && { note: order.note }),
                         }));
                         setOrders(convertedOrders);
                         console.log("✅ Loaded orders from Firestore");
@@ -95,6 +97,7 @@ export function useFirestoreOrders(
                 total: newOrder.total,
                 paymentMethod: newOrder.paymentMethod,
                 date: newOrder.date,
+                ...(newOrder.note && { note: newOrder.note }),
             };
             const addedOrder = await addOrder(firestoreOrder);
             const convertedOrder: Order = {
@@ -103,6 +106,7 @@ export function useFirestoreOrders(
                 total: addedOrder.total,
                 paymentMethod: addedOrder.paymentMethod,
                 date: addedOrder.date,
+                ...(addedOrder.note && { note: addedOrder.note }),
             };
             setOrders([convertedOrder, ...orders]);
             console.log("✅ Order saved to Firestore");

@@ -79,6 +79,7 @@ export interface FirestoreOrder {
     total: number;
     paymentMethod: "cash" | "card";
     date: string;
+    note?: string;
     createdAt?: Timestamp;
 }
 

@@ -6,6 +6,36 @@ export interface MenuItem {
 
 export const menuItems: MenuItem[] = [
     {
+        "category": "Menu",
+        "product": "Çikolatalı Kruvassan",
+        "price": 100
+    },
+    {
+        "category": "Menu",
+        "product": "Tereyağlı Kruvassan",
+        "price": 100
+    },
+    {
+        "category": "Menu",
+        "product": "Tereyağlı Kruvassan + Filtre Kahve",
+        "price": 200
+    },
+    {
+        "category": "Menu",
+        "product": "Çikolatalı Kruvassan + Filtre Kahve",
+        "price": 200
+    },
+    {
+        "category": "Menu",
+        "product": "Çikolatalı Kruvassan + Americano",
+        "price": 200
+    },
+    {
+        "category": "Menu",
+        "product": "Tereyağlı Kruvassan + Americano",
+        "price": 200
+    },
+    {
         "category": "Kahve",
         "product": "Espresso (S)",
         "price": 130
@@ -88,7 +118,7 @@ export const menuItems: MenuItem[] = [
     {
         "category": "Kahve",
         "product": "Cortado",
-        "price": 165
+        "price": 180
     },
     {
         "category": "Kahve",

@@ -249,7 +249,8 @@ export async function fetchDailyRevenue(date: string): Promise<number> {
  */
 export async function updateDailyAggregate(order: FirestoreOrder): Promise<void> {
     try {
-        const orderDate = order.date; // YYYY-MM-DD
+        // Extract just the date portion (YYYY-MM-DD) in case the order.date has time component
+        const orderDate = order.date.split(' ')[0]; // YYYY-MM-DD
         const monthKey = orderDate.substring(0, 7); // YYYY-MM
         const monthlyAggregatesCollection = getMonthlyAggregatesCollection();
         const monthDocRef = doc(monthlyAggregatesCollection, monthKey);
@@ -321,7 +322,8 @@ export async function updateDailyAggregate(order: FirestoreOrder): Promise<void>
  */
 export async function decrementDailyAggregate(order: FirestoreOrder): Promise<void> {
     try {
-        const orderDate = order.date; // YYYY-MM-DD
+        // Extract just the date portion (YYYY-MM-DD) in case the order.date has time component
+        const orderDate = order.date.split(' ')[0]; // YYYY-MM-DD
         const monthKey = orderDate.substring(0, 7); // YYYY-MM
         const monthlyAggregatesCollection = getMonthlyAggregatesCollection();
         const monthDocRef = doc(monthlyAggregatesCollection, monthKey);

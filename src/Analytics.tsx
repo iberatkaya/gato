@@ -31,9 +31,23 @@ export function Analytics() {
 
   // Set default custom dates to last 90 days
   const getDefaultCustomDates = () => {
-    const today = new Date();
+    // Get current date in Turkish timezone
+    const now = new Date();
+    const turkishToday = new Date(
+      now.toLocaleString("en-US", {
+        timeZone: "Europe/Istanbul",
+      }),
+    );
+
+    const today = new Date(
+      turkishToday.getFullYear(),
+      turkishToday.getMonth(),
+      turkishToday.getDate(),
+    );
+
     const startDate = new Date(today);
     startDate.setDate(today.getDate() - 89); // 90 days including today
+
     return {
       start: startDate.toISOString().split("T")[0],
       end: today.toISOString().split("T")[0],
@@ -46,9 +60,20 @@ export function Analytics() {
 
   // Calculate date range
   const getDateRange = (): { startDate: string; endDate: string } => {
-    // Use the same date calculation as when creating orders
-    const todayStr = new Date().toISOString().split("T")[0];
-    const today = new Date(todayStr + "T00:00:00");
+    // Get current date in Turkish timezone (Europe/Istanbul)
+    const now = new Date();
+    const turkishDate = new Date(
+      now.toLocaleString("en-US", {
+        timeZone: "Europe/Istanbul",
+      }),
+    );
+
+    // Format as YYYY-MM-DD
+    const today = new Date(
+      turkishDate.getFullYear(),
+      turkishDate.getMonth(),
+      turkishDate.getDate(),
+    );
 
     let startDate = new Date(today);
     const endDate = new Date(today);

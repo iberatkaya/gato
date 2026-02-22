@@ -95,14 +95,33 @@ function App() {
     if (currentOrder.length === 0) return;
 
     try {
+      // Get current date in Turkish timezone (Europe/Istanbul)
+      const now = new Date();
+
+      // Get the date components in Turkish timezone
+      const turkishDate = new Date(
+        now.toLocaleString("en-US", {
+          timeZone: "Europe/Istanbul",
+        }),
+      );
+
+      // Format as YYYY-MM-DD
+      const year = turkishDate.getFullYear();
+      const month = String(turkishDate.getMonth() + 1).padStart(2, "0");
+      const day = String(turkishDate.getDate()).padStart(2, "0");
+      const dateStr = `${year}-${month}-${day}`;
+
+      console.log("Saving order with date:", dateStr);
+
       const newOrder: Omit<Order, "id"> = {
         items: [...currentOrder],
         total: calculateTotal(),
         paymentMethod,
-        date: new Date().toISOString().split("T")[0],
+        date: dateStr,
         ...(orderNote.trim() && { note: orderNote.trim() }),
       };
 
+      console.log("Order object:", newOrder);
       await addNewOrder(newOrder);
       setCurrentOrder([]);
       setOrderNote("");
@@ -354,46 +373,54 @@ function App() {
             <p className="empty-state">Henüz sipariş bulunmamaktadır.</p>
           ) : (
             <div className="history-list">
-              {orders.map((order) => (
-                <div key={order.id} className="history-item">
-                  <div className="history-header">
-                    <div>
-                      <strong>Tarih:</strong> {order.date}
-                    </div>
-                    <div>
-                      <strong>Ödeme:</strong>{" "}
-                      {order.paymentMethod === "cash" ? "Nakit" : "Kart"}
-                    </div>
-                  </div>
+              {orders.map((order) => {
+                // Split date and time if time exists
+                const [datePart, timePart] = order.date.split(" ");
+                const displayDate = timePart
+                  ? `${datePart} ${timePart}`
+                  : datePart;
 
-                  <div className="history-items">
-                    {order.items.map((item, index) => (
-                      <div key={index} className="history-item-row">
-                        {item.quantity}x {item.product} -{" "}
-                        {item.price * item.quantity} TL
+                return (
+                  <div key={order.id} className="history-item">
+                    <div className="history-header">
+                      <div>
+                        <strong>Tarih:</strong> {displayDate}
                       </div>
-                    ))}
-                  </div>
-
-                  {order.note && (
-                    <div className="history-note">
-                      <strong>Not:</strong> {order.note}
+                      <div>
+                        <strong>Ödeme:</strong>{" "}
+                        {order.paymentMethod === "cash" ? "Nakit" : "Kart"}
+                      </div>
                     </div>
-                  )}
 
-                  <div className="history-footer">
-                    <strong className="history-total">
-                      Toplam: {order.total} TL
-                    </strong>
-                    <button
-                      onClick={() => deleteOrder(order.id)}
-                      className="delete-button"
-                    >
-                      Sil
-                    </button>
+                    <div className="history-items">
+                      {order.items.map((item, index) => (
+                        <div key={index} className="history-item-row">
+                          {item.quantity}x {item.product} -{" "}
+                          {item.price * item.quantity} TL
+                        </div>
+                      ))}
+                    </div>
+
+                    {order.note && (
+                      <div className="history-note">
+                        <strong>Not:</strong> {order.note}
+                      </div>
+                    )}
+
+                    <div className="history-footer">
+                      <strong className="history-total">
+                        Toplam: {order.total} TL
+                      </strong>
+                      <button
+                        onClick={() => deleteOrder(order.id)}
+                        className="delete-button"
+                      >
+                        Sil
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </>

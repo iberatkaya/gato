@@ -53,6 +53,7 @@ export function useFirestoreOrders(
                     try {
                         // Fetch from Firestore
                         const firestoreOrders = await fetchOrders();
+                        console.log("Raw Firestore orders:", firestoreOrders);
                         const convertedOrders: Order[] = firestoreOrders.map((order) => ({
                             id: order.id || "",
                             items: order.items,
@@ -61,6 +62,7 @@ export function useFirestoreOrders(
                             date: order.date,
                             ...(order.note && { note: order.note }),
                         }));
+                        console.log("Converted orders:", convertedOrders);
                         setOrders(convertedOrders);
                         console.log("✅ Loaded orders from Firestore");
                     } catch (firestoreError) {

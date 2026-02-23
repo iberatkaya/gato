@@ -32,9 +32,25 @@ export function useAnalyticsAggregates(): UseAnalyticsAggregatesResult {
             setLoading(true);
             setError(null);
 
+            console.log(`🔍 Fetching aggregates from ${startDate} to ${endDate}`);
             const aggregates = await fetchAggregatesInRange(startDate, endDate);
-            setDailyAggregates(aggregates);
+
+            // DEBUG: Log detailed information about fetched data
             console.log(`✅ Loaded ${aggregates.length} daily aggregates from ${startDate} to ${endDate}`);
+            console.log("🐛 First 3 aggregates:", aggregates.slice(0, 3));
+
+            if (aggregates.length > 0) {
+                const sampleStats = {
+                    totalAggregates: aggregates.length,
+                    firstDate: aggregates[0]?.date,
+                    lastDate: aggregates[aggregates.length - 1]?.date,
+                    totalRevenue: aggregates.reduce((sum, d) => sum + d.totalRevenue, 0),
+                    totalOrders: aggregates.reduce((sum, d) => sum + d.totalOrders, 0),
+                };
+                console.log("🐛 Aggregate Stats:", sampleStats);
+            }
+
+            setDailyAggregates(aggregates);
         } catch (firestoreError) {
             console.error("❌ Error loading aggregates from Firestore:", firestoreError);
             setError("⚠️ Failed to load analytics data from Firestore");

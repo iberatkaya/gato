@@ -424,7 +424,6 @@ export async function fetchAggregatesInRange(
     endDate: string
 ): Promise<DailyAggregate[]> {
     try {
-        console.log(`🔍 Firebase: Fetching aggregates from ${startDate} to ${endDate}`);
         const aggregates: DailyAggregate[] = [];
 
         // Get unique months in the range
@@ -441,34 +440,18 @@ export async function fetchAggregatesInRange(
             currentMonth = `${nextDate.getFullYear()}-${String(nextDate.getMonth() + 1).padStart(2, '0')}`;
         }
 
-        console.log(`🐛 Months to query:`, months);
-
         // Fetch all relevant monthly documents
         for (const monthKey of months) {
-            console.log(`🔍 Fetching month: ${monthKey}`);
             const monthData = await fetchMonthlyAggregate(monthKey);
 
             if (monthData && monthData.dailyStats) {
-                console.log(`✅ Found ${Object.keys(monthData.dailyStats).length} days in ${monthKey}`);
-                console.log(`🐛 Sample dailyStats for ${monthKey}:`, Object.entries(monthData.dailyStats).slice(0, 2));
-
                 // Filter daily stats within the date range
                 Object.entries(monthData.dailyStats).forEach(([date, stats]) => {
                     if (date >= startDate && date <= endDate) {
-                        console.log(`🐛 Adding aggregate for ${date}:`, stats);
                         aggregates.push(stats);
-                    } else {
-                        console.log(`⏭️ Skipping ${date} (outside range)`);
                     }
                 });
-            } else {
-                console.log(`⚠️ No data found for ${monthKey}`);
             }
-        }
-
-        console.log(`🐛 Final aggregates count: ${aggregates.length}`);
-        if (aggregates.length > 0) {
-            console.log(`🐛 Sample aggregates:`, aggregates.slice(0, 2));
         }
 
         return aggregates.sort((a, b) => a.date.localeCompare(b.date));

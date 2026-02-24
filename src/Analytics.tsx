@@ -24,18 +24,6 @@ export function Analytics() {
     isFirestoreEnabled,
   } = useAnalyticsAggregates();
 
-  // DEBUG: Component mounted alert - ALWAYS SHOWS
-  useEffect(() => {
-    alert(
-      "🚀 ANALYTICS COMPONENT LOADED\n\n" +
-        `This alert confirms the debug code is running.\n` +
-        `Firestore Enabled: ${isFirestoreEnabled}\n` +
-        `Initial Loading State: ${loading}\n` +
-        `Initial Aggregates Count: ${dailyAggregates.length}`,
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Empty dependency array = runs once on mount
-
   // Date range state
   const [dateRange, setDateRange] = useState<
     "today" | "week" | "month" | "ytd" | "custom"
@@ -152,33 +140,6 @@ export function Analytics() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dateRange, customStartDate, customEndDate, isFirestoreEnabled]);
-
-  // DEBUG ALERT - Show Firestore data when it arrives
-  useEffect(() => {
-    if (!loading && dailyAggregates.length > 0) {
-      const { startDate, endDate } = getDateRange();
-      const dataPreview = dailyAggregates.slice(0, 3).map((agg) => ({
-        date: agg.date,
-        totalRevenue: agg.totalRevenue,
-        totalOrders: agg.totalOrders,
-        cashRevenue: agg.cashRevenue,
-        cardRevenue: agg.cardRevenue,
-        itemCountsKeys: Object.keys(agg.itemCounts || {}),
-      }));
-
-      alert(
-        "📦 FIRESTORE DATA LOADED - Screenshot this!\n\n" +
-          `Date Range: ${startDate} to ${endDate}\n` +
-          `Total Aggregates: ${dailyAggregates.length}\n` +
-          `Firestore Enabled: ${isFirestoreEnabled}\n` +
-          `\nFirst 3 Days Preview:\n` +
-          JSON.stringify(dataPreview, null, 2) +
-          `\n\nFull First Aggregate:\n` +
-          JSON.stringify(dailyAggregates[0], null, 2),
-      );
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dailyAggregates, loading]);
 
   // Helper function to format date for display
   const formatDate = (dateString: string) => {
@@ -308,64 +269,6 @@ export function Analytics() {
     0,
   );
 
-  // DEBUG ALERT - Show diagnostic info for Turkey users
-  useEffect(() => {
-    const debugInfo = {
-      dailyAggregatesCount: dailyAggregates.length,
-      totalRevenue,
-      totalOrders,
-      cashRevenue,
-      cardRevenue,
-      totalCash,
-      totalCard,
-      dateRange,
-      isFirestoreEnabled,
-      loading,
-      error,
-      sampleAggregate: dailyAggregates[0] || null,
-      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-      locale: navigator.language,
-    };
-
-    // Show alert only if we have a problem (all zeros but not loading)
-    if (
-      !loading &&
-      dailyAggregates.length > 0 &&
-      totalRevenue === 0 &&
-      totalOrders === 0
-    ) {
-      alert(
-        "🐛 DEBUG INFO - Screenshot this!\n\n" +
-          `Aggregates Count: ${debugInfo.dailyAggregatesCount}\n` +
-          `Total Revenue: ${debugInfo.totalRevenue}\n` +
-          `Total Orders: ${debugInfo.totalOrders}\n` +
-          `Cash Revenue: ${debugInfo.cashRevenue}\n` +
-          `Card Revenue: ${debugInfo.cardRevenue}\n` +
-          `Date Range: ${debugInfo.dateRange}\n` +
-          `Firestore Enabled: ${debugInfo.isFirestoreEnabled}\n` +
-          `Loading: ${debugInfo.loading}\n` +
-          `Error: ${debugInfo.error || "none"}\n` +
-          `Sample Aggregate: ${JSON.stringify(debugInfo.sampleAggregate, null, 2)}\n` +
-          `Timezone: ${debugInfo.timezone}\n` +
-          `Locale: ${debugInfo.locale}`,
-      );
-    }
-
-    console.log("🐛 Analytics Debug Info:", debugInfo);
-  }, [
-    totalRevenue,
-    totalOrders,
-    dailyAggregates,
-    dateRange,
-    isFirestoreEnabled,
-    loading,
-    error,
-    cashRevenue,
-    cardRevenue,
-    totalCash,
-    totalCard,
-  ]);
-
   // Chart data - fill in missing dates for continuous display
   const getChartData = () => {
     const { startDate, endDate } = getDateRange();
@@ -423,78 +326,6 @@ export function Analytics() {
   return (
     <div className="analytics-container">
       <h2 className="page-title">Analytics & İstatistikler</h2>
-      {/* DEBUG PANEL - VISIBLE IN UI */}
-      <div
-        style={{
-          position: "fixed",
-          top: "10px",
-          right: "10px",
-          backgroundColor: "#ff6b6b",
-          color: "white",
-          padding: "20px",
-          borderRadius: "10px",
-          maxWidth: "400px",
-          maxHeight: "80vh",
-          overflow: "auto",
-          zIndex: 9999,
-          fontSize: "12px",
-          fontFamily: "monospace",
-          boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
-        }}
-      >
-        <h3 style={{ margin: "0 0 10px 0", fontSize: "16px" }}>
-          🐛 DEBUG INFO - Screenshot This!
-        </h3>
-        <div style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
-          <strong>Firestore Status:</strong>{" "}
-          {isFirestoreEnabled ? "✅ Enabled" : "❌ Disabled"}
-          <br />
-          <strong>Loading:</strong> {loading ? "⏳ Yes" : "✅ No"}
-          <br />
-          <strong>Error:</strong> {error || "None"}
-          <br />
-          <strong>Date Range:</strong> {dateRange}
-          <br />
-          <strong>Query Dates:</strong>{" "}
-          {(() => {
-            const { startDate, endDate } = getDateRange();
-            return `${startDate} to ${endDate}`;
-          })()}
-          <br />
-          <strong>Aggregates Count:</strong> {dailyAggregates.length}
-          <br />
-          <strong>Total Revenue:</strong> {totalRevenue.toFixed(2)} TL
-          <br />
-          <strong>Total Orders:</strong> {totalOrders}
-          <br />
-          <strong>Cash Revenue:</strong> {cashRevenue.toFixed(2)} TL
-          <br />
-          <strong>Card Revenue:</strong> {cardRevenue.toFixed(2)} TL
-          <br />
-          <strong>Your Timezone:</strong>{" "}
-          {Intl.DateTimeFormat().resolvedOptions().timeZone}
-          <br />
-          <strong>App Uses Timezone:</strong> Europe/Istanbul (Turkey)
-          <br />
-          <strong>Your Local Time:</strong> {new Date().toLocaleString()}
-          <br />
-          <strong>Turkey Time:</strong>{" "}
-          {new Date().toLocaleString("en-US", { timeZone: "Europe/Istanbul" })}
-          <br />
-          <strong>Locale:</strong> {navigator.language}
-          <br />
-          <br />
-          <strong>First Aggregate Sample:</strong>
-          <br />
-          {dailyAggregates.length > 0 ? (
-            <pre style={{ fontSize: "10px", margin: "5px 0" }}>
-              {JSON.stringify(dailyAggregates[0], null, 2)}
-            </pre>
-          ) : (
-            "No data"
-          )}
-        </div>
-      </div>
       {/* Date Range Filter */}
       <div className="date-filter-container">
         <div className="filter-buttons">

@@ -45,18 +45,23 @@ export function Analytics() {
   const getDefaultCustomDates = () => {
     // Get current date in Turkish timezone
     const now = new Date();
-    const turkishToday = new Date(
-      now.toLocaleString("en-US", {
-        timeZone: "Europe/Istanbul",
-      }),
-    );
 
-    const today = new Date(
-      turkishToday.getFullYear(),
-      turkishToday.getMonth(),
-      turkishToday.getDate(),
-    );
+    // Create a formatter for Turkish timezone
+    const turkishFormatter = new Intl.DateTimeFormat("en-US", {
+      timeZone: "Europe/Istanbul",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
 
+    // Get the parts of the date in Turkish timezone
+    const parts = turkishFormatter.formatToParts(now);
+    const year = parseInt(parts.find((p) => p.type === "year")!.value);
+    const month = parseInt(parts.find((p) => p.type === "month")!.value);
+    const day = parseInt(parts.find((p) => p.type === "day")!.value);
+
+    // Calculate dates
+    const today = new Date(year, month - 1, day);
     const startDate = new Date(today);
     startDate.setDate(today.getDate() - 89); // 90 days including today
 
@@ -74,41 +79,49 @@ export function Analytics() {
   const getDateRange = (): { startDate: string; endDate: string } => {
     // Get current date in Turkish timezone (Europe/Istanbul)
     const now = new Date();
-    const turkishDate = new Date(
-      now.toLocaleString("en-US", {
-        timeZone: "Europe/Istanbul",
-      }),
-    );
 
-    // Format as YYYY-MM-DD
-    const today = new Date(
-      turkishDate.getFullYear(),
-      turkishDate.getMonth(),
-      turkishDate.getDate(),
-    );
+    // Create a formatter for Turkish timezone
+    const turkishFormatter = new Intl.DateTimeFormat("en-US", {
+      timeZone: "Europe/Istanbul",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
 
-    let startDate = new Date(today);
-    const endDate = new Date(today);
+    // Get the parts of the date in Turkish timezone
+    const parts = turkishFormatter.formatToParts(now);
+    const year = parseInt(parts.find((p) => p.type === "year")!.value);
+    const month = parseInt(parts.find((p) => p.type === "month")!.value);
+    const day = parseInt(parts.find((p) => p.type === "day")!.value);
+
+    // Create date strings directly in YYYY-MM-DD format
+    const todayStr = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+
+    let startDateStr = todayStr;
+    const endDateStr = todayStr;
 
     switch (dateRange) {
       case "today":
         // Today only
         break;
-      case "week":
+      case "week": {
         // Last 7 days
-        startDate.setDate(today.getDate() - 6);
+        const weekStart = new Date(year, month - 1, day);
+        weekStart.setDate(weekStart.getDate() - 6);
+        startDateStr = weekStart.toISOString().split("T")[0];
         break;
-      case "month":
+      }
+      case "month": {
         // Last 30 days
-        startDate.setDate(today.getDate() - 29);
+        const monthStart = new Date(year, month - 1, day);
+        monthStart.setDate(monthStart.getDate() - 29);
+        startDateStr = monthStart.toISOString().split("T")[0];
         break;
+      }
       case "ytd": {
         // Year-to-date (January 1 to today)
-        const yearStart = new Date(today.getFullYear(), 0, 1);
-        return {
-          startDate: yearStart.toISOString().split("T")[0],
-          endDate: endDate.toISOString().split("T")[0],
-        };
+        startDateStr = `${year}-01-01`;
+        break;
       }
       case "custom": {
         if (customStartDate && customEndDate) {
@@ -118,18 +131,16 @@ export function Analytics() {
           };
         }
         // Fallback to last 90 days if custom dates not set
-        const fallbackStart = new Date(today);
-        fallbackStart.setDate(today.getDate() - 89);
-        return {
-          startDate: fallbackStart.toISOString().split("T")[0],
-          endDate: endDate.toISOString().split("T")[0],
-        };
+        const fallbackStart = new Date(year, month - 1, day);
+        fallbackStart.setDate(fallbackStart.getDate() - 89);
+        startDateStr = fallbackStart.toISOString().split("T")[0];
+        break;
       }
     }
 
     return {
-      startDate: startDate.toISOString().split("T")[0],
-      endDate: endDate.toISOString().split("T")[0],
+      startDate: startDateStr,
+      endDate: endDateStr,
     };
   };
 
@@ -444,6 +455,12 @@ export function Analytics() {
           <br />
           <strong>Date Range:</strong> {dateRange}
           <br />
+          <strong>Query Dates:</strong>{" "}
+          {(() => {
+            const { startDate, endDate } = getDateRange();
+            return `${startDate} to ${endDate}`;
+          })()}
+          <br />
           <strong>Aggregates Count:</strong> {dailyAggregates.length}
           <br />
           <strong>Total Revenue:</strong> {totalRevenue.toFixed(2)} TL
@@ -454,8 +471,15 @@ export function Analytics() {
           <br />
           <strong>Card Revenue:</strong> {cardRevenue.toFixed(2)} TL
           <br />
-          <strong>Timezone:</strong>{" "}
+          <strong>Your Timezone:</strong>{" "}
           {Intl.DateTimeFormat().resolvedOptions().timeZone}
+          <br />
+          <strong>App Uses Timezone:</strong> Europe/Istanbul (Turkey)
+          <br />
+          <strong>Your Local Time:</strong> {new Date().toLocaleString()}
+          <br />
+          <strong>Turkey Time:</strong>{" "}
+          {new Date().toLocaleString("en-US", { timeZone: "Europe/Istanbul" })}
           <br />
           <strong>Locale:</strong> {navigator.language}
           <br />

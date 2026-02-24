@@ -41,7 +41,6 @@ function App() {
     error: firestoreError,
     addNewOrder,
     removeOrder,
-    isFirestoreEnabled,
   } = useFirestoreOrders();
 
   const [view, setView] = useState<"order" | "history" | "analytics">("order");

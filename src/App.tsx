@@ -95,29 +95,31 @@ function App() {
     if (currentOrder.length === 0) return;
 
     try {
-      // Get current date in Turkish timezone (Europe/Istanbul)
+      // Get current date and time in Turkish timezone (Europe/Istanbul)
       const now = new Date();
 
-      // Get the date components in Turkish timezone
-      const turkishDate = new Date(
+      // Get the date and time components in Turkish timezone
+      const turkishDateTime = new Date(
         now.toLocaleString("en-US", {
           timeZone: "Europe/Istanbul",
         }),
       );
 
-      // Format as YYYY-MM-DD
-      const year = turkishDate.getFullYear();
-      const month = String(turkishDate.getMonth() + 1).padStart(2, "0");
-      const day = String(turkishDate.getDate()).padStart(2, "0");
-      const dateStr = `${year}-${month}-${day}`;
+      // Format as YYYY-MM-DD HH:MM
+      const year = turkishDateTime.getFullYear();
+      const month = String(turkishDateTime.getMonth() + 1).padStart(2, "0");
+      const day = String(turkishDateTime.getDate()).padStart(2, "0");
+      const hours = String(turkishDateTime.getHours()).padStart(2, "0");
+      const minutes = String(turkishDateTime.getMinutes()).padStart(2, "0");
+      const dateTimeStr = `${year}-${month}-${day} ${hours}:${minutes}`;
 
-      console.log("Saving order with date:", dateStr);
+      console.log("Saving order with date and time:", dateTimeStr);
 
       const newOrder: Omit<Order, "id"> = {
         items: [...currentOrder],
         total: calculateTotal(),
         paymentMethod,
-        date: dateStr,
+        date: dateTimeStr,
         ...(orderNote.trim() && { note: orderNote.trim() }),
       };
 
@@ -180,14 +182,6 @@ function App() {
           <h1>Gato Coffee Bar</h1>
           <div className="header-actions">
             <span className="header-user">👤 {currentUser}</span>
-            {isFirestoreEnabled && (
-              <span
-                className="firestore-indicator"
-                title="Using Firebase Firestore"
-              >
-                ☁️ Cloud
-              </span>
-            )}
             <button
               onClick={handleLogout}
               className="logout-button"
@@ -374,17 +368,11 @@ function App() {
           ) : (
             <div className="history-list">
               {orders.map((order) => {
-                // Split date and time if time exists
-                const [datePart, timePart] = order.date.split(" ");
-                const displayDate = timePart
-                  ? `${datePart} ${timePart}`
-                  : datePart;
-
                 return (
                   <div key={order.id} className="history-item">
                     <div className="history-header">
                       <div>
-                        <strong>Tarih:</strong> {displayDate}
+                        <strong>Tarih:</strong> {order.date}
                       </div>
                       <div>
                         <strong>Ödeme:</strong>{" "}

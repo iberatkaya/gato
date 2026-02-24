@@ -36,6 +36,36 @@ export const menuItems: MenuItem[] = [
         "price": 200
     },
     {
+        "category": "İkram",
+        "product": "İkram Kahve",
+        "price": 0
+    },
+    {
+        "category": "İkram",
+        "product": "İkram Tatlı",
+        "price": 0
+    },
+    {
+        "category": "İndirimli Kahve",
+        "product": "İndirimli Americano",
+        "price": 155
+    },
+    {
+        "category": "İndirimli Kahve",
+        "product": "İndirimli Filtre",
+        "price": 145
+    },
+    {
+        "category": "İndirimli Kahve",
+        "product": "İndirimli Latte",
+        "price": 175
+    },
+    {
+        "category": "İndirimli Kahve",
+        "product": "İndirimli Espresso",
+        "price": 100
+    },
+    {
         "category": "Kahve",
         "product": "Espresso (S)",
         "price": 130
@@ -52,11 +82,6 @@ export const menuItems: MenuItem[] = [
     },
     {
         "category": "Kahve",
-        "product": "Indirimli Americano",
-        "price": 155
-    },
-    {
-        "category": "Kahve",
         "product": "Ice Americano",
         "price": 195
     },
@@ -67,11 +92,6 @@ export const menuItems: MenuItem[] = [
     },
     {
         "category": "Kahve",
-        "product": "Indirimli Filtre",
-        "price": 145
-    },
-    {
-        "category": "Kahve",
         "product": "V60",
         "price": 240
     },
@@ -79,11 +99,6 @@ export const menuItems: MenuItem[] = [
         "category": "Kahve",
         "product": "Latte",
         "price": 195
-    },
-    {
-        "category": "Kahve",
-        "product": "Indirimli Latte",
-        "price": 175
     },
     {
         "category": "Kahve",
@@ -191,14 +206,19 @@ export const menuItems: MenuItem[] = [
         "price": 65
     },
     {
-        "category": "Tatlı",
-        "product": "Cookie",
-        "price": 195
+        "category": "İndirimli Tatlı",
+        "product": "İndirimli Cookie",
+        "price": 175
+    },
+    {
+        "category": "İndirimli Tatlı",
+        "product": "İndirimli Kek",
+        "price": 220
     },
     {
         "category": "Tatlı",
-        "product": "Indirimli Cookie",
-        "price": 175
+        "product": "Cookie",
+        "price": 195
     },
     {
         "category": "Tatlı",
@@ -207,8 +227,13 @@ export const menuItems: MenuItem[] = [
     },
     {
         "category": "Tatlı",
-        "product": "Indirimli Kek",
-        "price": 220
+        "product": "Mermer Kek",
+        "price": 150
+    },
+    {
+        "category": "Tatlı",
+        "product": "Havuçlu Tarçınlı",
+        "price": 150
     },
     {
         "category": "Paket Kahve",

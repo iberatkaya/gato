@@ -388,8 +388,14 @@ export function Analytics() {
                       const maxEndDate = new Date(start);
                       maxEndDate.setDate(start.getDate() + 185);
                       const turkishToday = getTurkishToday();
-                      const calculatedEnd = maxEndDate.toISOString().split("T")[0];
-                      setCustomEndDate(calculatedEnd > turkishToday ? turkishToday : calculatedEnd);
+                      const calculatedEnd = maxEndDate
+                        .toISOString()
+                        .split("T")[0];
+                      setCustomEndDate(
+                        calculatedEnd > turkishToday
+                          ? turkishToday
+                          : calculatedEnd,
+                      );
                     }
                   }
                 }}

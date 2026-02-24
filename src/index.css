@@ -5,7 +5,7 @@
 
   color-scheme: light;
   color: #ffffff;
-  background: linear-gradient(180deg, #2d5f3f 0%, #1e4230 100%);
+  background: linear-gradient(180deg, #2d5432 0%, #1e3f2a 100%);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -21,14 +21,14 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background: linear-gradient(180deg, #2d5f3f 0%, #1e4230 100%);
+  background: linear-gradient(180deg, #2d5432 0%, #1e3f2a 100%);
   color: #ffffff;
 }
 
 h1 {
   font-size: 2em;
   line-height: 1.1;
-  color: #ffffff;
+  color: #f4d06f;
   margin: 0;
   font-weight: 600;
 }

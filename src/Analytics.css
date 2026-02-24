@@ -8,6 +8,7 @@
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   margin-bottom: 24px;
+  border-top: 3px solid #f4d06f;
 }
 
 .filter-buttons {
@@ -29,14 +30,15 @@
 }
 
 .filter-btn:hover {
-  border-color: #2e7d32;
-  background-color: #f1f8f4;
+  border-color: #f4d06f;
+  background-color: rgba(244, 208, 111, 0.1);
 }
 
 .filter-btn.active {
-  background-color: #2e7d32;
-  color: white;
-  border-color: #2e7d32;
+  background-color: #f4d06f;
+  color: #2d5432;
+  border-color: #f4d06f;
+  box-shadow: 0 2px 8px rgba(244, 208, 111, 0.3);
 }
 
 .custom-date-inputs {
@@ -65,18 +67,23 @@
 .export-btn {
   margin-top: 16px;
   padding: 10px 20px;
-  background-color: #2e7d32;
-  color: white;
+  background-color: #f4d06f;
+  color: #2d5432;
   border: none;
   border-radius: 6px;
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(244, 208, 111, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .export-btn:hover:not(:disabled) {
-  background-color: #1b5e20;
+  background-color: #e8c45c;
+  box-shadow: 0 4px 10px rgba(244, 208, 111, 0.4);
+  transform: translateY(-1px);
 }
 
 .export-btn:disabled {
@@ -95,10 +102,11 @@
 .error-state {
   text-align: center;
   padding: 20px;
-  background-color: #ffebee;
-  color: #c62828;
+  background-color: #fef3e8;
+  color: #b56938;
   border-radius: 8px;
   margin-bottom: 20px;
+  border-left: 4px solid #c77c4a;
 }
 
 .stats-grid {
@@ -114,7 +122,7 @@
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   text-align: center;
-  border-left: 4px solid #2e7d32;
+  border-left: 4px solid #f4d06f;
 }
 
 .stat-card-large {
@@ -132,7 +140,7 @@
 .stat-value {
   font-size: 1.6rem;
   font-weight: 700;
-  color: #1e4230;
+  color: #2d5432;
 }
 
 .stat-card-large .stat-value {
@@ -151,6 +159,7 @@
   padding: 24px;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-top: 3px solid #f4d06f;
 }
 
 .chart-container.full-width {
@@ -159,7 +168,7 @@
 
 .chart-container h3 {
   margin: 0 0 20px 0;
-  color: #1e4230;
+  color: #2d5432;
   font-size: 1.1rem;
   font-weight: 600;
 }
@@ -175,6 +184,7 @@
   padding: 24px;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-left: 4px solid #f4d06f;
 }
 
 .daily-header {
@@ -188,7 +198,7 @@
 
 .daily-header h3 {
   font-size: 1.3rem;
-  color: #1e4230;
+  color: #2d5432;
   margin: 0;
 }
 
@@ -207,8 +217,9 @@
 }
 
 .summary-badge.revenue {
-  background-color: #c8e6c9;
-  color: #1b5e20;
+  background-color: #f4d06f;
+  color: #2d5432;
+  font-weight: 700;
 }
 
 .daily-details {
@@ -230,7 +241,7 @@
 
 .detail-value {
   font-weight: 700;
-  color: #2e7d32;
+  color: #2d5432;
   font-size: 1.1rem;
 }
 
@@ -242,7 +253,7 @@
 
 .daily-items h4 {
   margin: 0 0 12px 0;
-  color: #1e4230;
+  color: #2d5432;
   font-size: 0.95rem;
 }
 
@@ -303,8 +314,8 @@
     justify-content: space-between;
   }
 }.item-qty {
-  background-color: rgba(46, 125, 50, 0.15);
-  color: #1b5e20;
+  background-color: rgba(45, 84, 50, 0.15);
+  color: #1e3f2a;
   padding: 2px 8px;
   border-radius: 4px;
   font-weight: 600;

@@ -209,8 +209,8 @@ function App() {
       {firestoreError && (
         <div
           style={{
-            backgroundColor: "#fee",
-            color: "#c00",
+            backgroundColor: "#fef3e8",
+            color: "#b56938",
             padding: "10px",
             marginBottom: "10px",
             borderRadius: "4px",

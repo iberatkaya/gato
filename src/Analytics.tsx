@@ -29,33 +29,32 @@ export function Analytics() {
     "today" | "week" | "month" | "ytd" | "custom"
   >("today");
 
-  // Set default custom dates to last 90 days
-  const getDefaultCustomDates = () => {
-    // Get current date in Turkish timezone
+  // Helper function to get Turkish today in YYYY-MM-DD format
+  const getTurkishToday = () => {
     const now = new Date();
-
-    // Create a formatter for Turkish timezone
     const turkishFormatter = new Intl.DateTimeFormat("en-US", {
       timeZone: "Europe/Istanbul",
       year: "numeric",
       month: "2-digit",
       day: "2-digit",
     });
-
-    // Get the parts of the date in Turkish timezone
     const parts = turkishFormatter.formatToParts(now);
     const year = parseInt(parts.find((p) => p.type === "year")!.value);
     const month = parseInt(parts.find((p) => p.type === "month")!.value);
     const day = parseInt(parts.find((p) => p.type === "day")!.value);
+    return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+  };
 
-    // Calculate dates
-    const today = new Date(year, month - 1, day);
+  // Set default custom dates to last 90 days
+  const getDefaultCustomDates = () => {
+    const todayStr = getTurkishToday();
+    const today = new Date(todayStr);
     const startDate = new Date(today);
     startDate.setDate(today.getDate() - 89); // 90 days including today
 
     return {
       start: startDate.toISOString().split("T")[0],
-      end: today.toISOString().split("T")[0],
+      end: todayStr,
     };
   };
 
@@ -368,6 +367,7 @@ export function Analytics() {
               <input
                 type="date"
                 value={customStartDate}
+                max={getTurkishToday()}
                 onChange={(e) => {
                   const newStartDate = e.target.value;
                   setCustomStartDate(newStartDate);
@@ -387,7 +387,9 @@ export function Analytics() {
                       // Set end date to 185 days from start
                       const maxEndDate = new Date(start);
                       maxEndDate.setDate(start.getDate() + 185);
-                      setCustomEndDate(maxEndDate.toISOString().split("T")[0]);
+                      const turkishToday = getTurkishToday();
+                      const calculatedEnd = maxEndDate.toISOString().split("T")[0];
+                      setCustomEndDate(calculatedEnd > turkishToday ? turkishToday : calculatedEnd);
                     }
                   }
                 }}
@@ -398,6 +400,7 @@ export function Analytics() {
               <input
                 type="date"
                 value={customEndDate}
+                max={getTurkishToday()}
                 onChange={(e) => {
                   const newEndDate = e.target.value;
                   setCustomEndDate(newEndDate);

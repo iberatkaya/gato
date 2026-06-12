@@ -75,11 +75,19 @@ export interface FirestoreOrder {
         product: string;
         price: number;
         quantity: number;
+        basePrice?: number;
+        modifiers?: string[];
+        complimentary?: boolean;
     }>;
     total: number;
     paymentMethod: "cash" | "card";
     date: string;
     note?: string;
+    source?: "counter" | "table";
+    tableId?: number;
+    tableName?: string;
+    loyaltyDiscount?: boolean;
+    discountAmount?: number;
     createdAt?: Timestamp;
 }
 

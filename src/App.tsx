@@ -6,11 +6,15 @@ import { Analytics } from "./Analytics";
 import "./Analytics.css";
 import { useFirestoreOrders } from "./useFirestoreOrders";
 import type { MenuItem } from "./menu";
+import { TableManagement } from "./TableManagement";
 
 interface OrderItem {
   product: string;
   price: number;
   quantity: number;
+  basePrice?: number;
+  modifiers?: string[];
+  complimentary?: boolean;
 }
 
 interface Order {
@@ -20,6 +24,11 @@ interface Order {
   paymentMethod: "cash" | "card";
   date: string;
   note?: string;
+  source?: "counter" | "table";
+  tableId?: number;
+  tableName?: string;
+  loyaltyDiscount?: boolean;
+  discountAmount?: number;
 }
 
 function App() {
@@ -43,7 +52,9 @@ function App() {
     removeOrder,
   } = useFirestoreOrders();
 
-  const [view, setView] = useState<"order" | "history" | "analytics">("order");
+  const [view, setView] = useState<
+    "order" | "tables" | "history" | "analytics"
+  >("order");
 
   const addProductToOrder = () => {
     if (!selectedProduct) return;
@@ -228,7 +239,13 @@ function App() {
           onClick={() => setView("order")}
           className={`toggle-button ${view === "order" ? "active" : ""}`}
         >
-          Sipariş Oluştur
+          Sipariş Sistemi
+        </button>
+        <button
+          onClick={() => setView("tables")}
+          className={`toggle-button ${view === "tables" ? "active" : ""}`}
+        >
+          Masa Yönetimi (Beta)
         </button>
         <button
           onClick={() => setView("history")}
@@ -359,6 +376,8 @@ function App() {
             </div>
           )}
         </>
+      ) : view === "tables" ? (
+        <TableManagement />
       ) : view === "history" ? (
         <>
           <h2 className="page-title">Sipariş Geçmişi</h2>
@@ -377,13 +396,41 @@ function App() {
                         <strong>Ödeme:</strong>{" "}
                         {order.paymentMethod === "cash" ? "Nakit" : "Kart"}
                       </div>
+                      {order.source === "table" && (
+                        <div>
+                          <strong>Kaynak:</strong> Masa {order.tableId ?? "-"}
+                        </div>
+                      )}
                     </div>
+
+                    {order.loyaltyDiscount && (
+                      <div className="history-note">
+                        <strong>Loyalty:</strong> %10 indirim uygulandı
+                      </div>
+                    )}
 
                     <div className="history-items">
                       {order.items.map((item, index) => (
                         <div key={index} className="history-item-row">
-                          {item.quantity}x {item.product} -{" "}
-                          {item.price * item.quantity} TL
+                          <div>
+                            {item.quantity}x {item.product} -{" "}
+                            {item.price * item.quantity} TL
+                            {(item.complimentary || item.modifiers?.length) && (
+                              <div
+                                style={{ fontSize: "0.85rem", opacity: 0.8 }}
+                              >
+                                {item.complimentary && (
+                                  <span>Complimentary</span>
+                                )}
+                                {item.complimentary && item.modifiers?.length
+                                  ? " · "
+                                  : null}
+                                {item.modifiers?.length
+                                  ? item.modifiers.join(" · ")
+                                  : null}
+                              </div>
+                            )}
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -395,9 +442,16 @@ function App() {
                     )}
 
                     <div className="history-footer">
-                      <strong className="history-total">
-                        Toplam: {order.total} TL
-                      </strong>
+                      <div>
+                        <strong className="history-total">
+                          Toplam: {order.total} TL
+                        </strong>
+                        {order.discountAmount ? (
+                          <div style={{ fontSize: "0.9rem", color: "#b56938" }}>
+                            İndirim: -{order.discountAmount} TL
+                          </div>
+                        ) : null}
+                      </div>
                       <button
                         onClick={() => deleteOrder(order.id)}
                         className="delete-button"

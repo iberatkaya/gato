@@ -6,268 +6,373 @@ export interface MenuItem {
 
 export const menuItems: MenuItem[] = [
     {
-        "category": "Menu",
-        "product": "Çikolatalı Kruvassan",
-        "price": 100
+        "category": "Espresso Bar",
+        "product": "Espresso (Single)",
+        "price": 160
     },
     {
-        "category": "Menu",
-        "product": "Tereyağlı Kruvassan",
-        "price": 100
-    },
-    {
-        "category": "Menu",
-        "product": "Tereyağlı Kruvassan + Filtre Kahve",
-        "price": 200
-    },
-    {
-        "category": "Menu",
-        "product": "Çikolatalı Kruvassan + Filtre Kahve",
-        "price": 200
-    },
-    {
-        "category": "Menu",
-        "product": "Çikolatalı Kruvassan + Americano",
-        "price": 200
-    },
-    {
-        "category": "Menu",
-        "product": "Tereyağlı Kruvassan + Americano",
-        "price": 200
-    },
-    {
-        "category": "İkram",
-        "product": "İkram Kahve",
-        "price": 0
-    },
-    {
-        "category": "İkram",
-        "product": "İkram Tatlı",
-        "price": 0
-    },
-    {
-        "category": "İndirimli Kahve",
-        "product": "İndirimli Americano",
-        "price": 155
-    },
-    {
-        "category": "İndirimli Kahve",
-        "product": "İndirimli Filtre",
-        "price": 145
-    },
-    {
-        "category": "İndirimli Kahve",
-        "product": "İndirimli Latte",
-        "price": 175
-    },
-    {
-        "category": "İndirimli Kahve",
-        "product": "İndirimli Espresso",
-        "price": 100
-    },
-    {
-        "category": "Kahve",
-        "product": "Espresso (S)",
-        "price": 130
-    },
-    {
-        "category": "Kahve",
-        "product": "Espresso (D)",
-        "price": 150
-    },
-    {
-        "category": "Kahve",
-        "product": "Americano",
-        "price": 175
-    },
-    {
-        "category": "Kahve",
-        "product": "Ice Americano",
-        "price": 195
-    },
-    {
-        "category": "Kahve",
-        "product": "Filtre Kahve",
-        "price": 165
-    },
-    {
-        "category": "Kahve",
-        "product": "V60",
-        "price": 240
-    },
-    {
-        "category": "Kahve",
-        "product": "Latte",
-        "price": 195
-    },
-    {
-        "category": "Kahve",
-        "product": "Ice Latte",
-        "price": 215
-    },
-    {
-        "category": "Kahve",
-        "product": "Yulaf Sütlü",
-        "price": 260
-    },
-    {
-        "category": "Kahve",
-        "product": "Vanilla Latte",
-        "price": 215
-    },
-    {
-        "category": "Kahve",
-        "product": "Pumpkin Spice",
-        "price": 275
-    },
-    {
-        "category": "Kahve",
-        "product": "Flat White",
-        "price": 195
-    },
-    {
-        "category": "Kahve",
-        "product": "Cappuccino",
-        "price": 195
-    },
-    {
-        "category": "Kahve",
-        "product": "Cortado",
+        "category": "Espresso Bar",
+        "product": "Espresso (Double)",
         "price": 180
     },
     {
-        "category": "Kahve",
+        "category": "Espresso Bar",
+        "product": "Ristretto",
+        "price": 160
+    },
+    {
+        "category": "Espresso Bar",
+        "product": "Lungo",
+        "price": 170
+    },
+    {
+        "category": "Espresso Bar",
+        "product": "Long Black",
+        "price": 220
+    },
+    {
+        "category": "Espresso Bar",
+        "product": "Espresso Macchiato",
+        "price": 190
+    },
+    {
+        "category": "Espresso Bar",
+        "product": "Cortado",
+        "price": 220
+    },
+    {
+        "category": "Brew Bar",
+        "product": "Gato House Blend Colombia / Filter Coffee",
+        "price": 225
+    },
+    {
+        "category": "Brew Bar",
+        "product": "V60 Pour Over",
+        "price": 325
+    },
+    {
+        "category": "Brew Bar",
+        "product": "Japanese Iced Coffee",
+        "price": 345
+    },
+    {
+        "category": "Brew Bar",
+        "product": "Cold Brew",
+        "price": 345
+    },
+    {
+        "category": "Brew Bar",
+        "product": "Mont Blanc",
+        "price": 395
+    },
+    {
+        "category": "Hot Coffees",
+        "product": "Americano",
+        "price": 210
+    },
+    {
+        "category": "Hot Coffees",
+        "product": "Caffe Latte",
+        "price": 250
+    },
+    {
+        "category": "Hot Coffees",
+        "product": "Vanilla Latte",
+        "price": 250
+    },
+    {
+        "category": "Hot Coffees",
+        "product": "Pumpkin Spice Latte",
+        "price": 310
+    },
+    {
+        "category": "Hot Coffees",
+        "product": "Flat White",
+        "price": 230
+    },
+    {
+        "category": "Hot Coffees",
+        "product": "Cappuccino",
+        "price": 230
+    },
+    {
+        "category": "Hot Coffees",
         "product": "Mocha",
-        "price": 230
+        "price": 290
     },
     {
-        "category": "Kahve",
-        "product": "White Chocolate",
-        "price": 230
+        "category": "Hot Coffees",
+        "product": "White Chocolate Mocha",
+        "price": 290
     },
     {
-        "category": "Kahve",
-        "product": "Türk Kahve",
-        "price": 135
+        "category": "Hot Coffees",
+        "product": "Turkish Coffee",
+        "price": 170
+    },
+    {
+        "category": "Hot Coffees",
+        "product": "Double Turkish Coffee",
+        "price": 220
     },
     {
         "category": "Matcha",
         "product": "Matcha Latte",
-        "price": 230
-    },
-    {
-        "category": "Matcha",
-        "product": "Yulaf Sütlü",
-        "price": 295
-    },
-    {
-        "category": "Matcha",
-        "product": "Iced Strawberry",
         "price": 300
     },
     {
         "category": "Matcha",
-        "product": "Iced Vanilla",
-        "price": 290
+        "product": "Iced Matcha Latte",
+        "price": 320
     },
     {
-        "category": "Özel İçecek",
-        "product": "Sıcak Çikolata",
-        "price": 195
+        "category": "Matcha",
+        "product": "Iced Strawberry Matcha",
+        "price": 380
     },
     {
-        "category": "Özel İçecek",
-        "product": "Chai Latte",
-        "price": 195
+        "category": "Matcha",
+        "product": "Iced Vanilla Matcha",
+        "price": 360
     },
     {
-        "category": "Özel İçecek",
+        "category": "Matcha",
+        "product": "Coconut Matcha Latte",
+        "price": 350
+    },
+    {
+        "category": "Matcha",
+        "product": "Pistachio Matcha Latte",
+        "price": 400
+    },
+    {
+        "category": "Non-Coffee",
         "product": "Salep",
-        "price": 195
-    },
-    {
-        "category": "Özel İçecek",
-        "product": "Kış Çayı",
-        "price": 180
-    },
-    {
-        "category": "Özel İçecek",
-        "product": "Rooibos",
-        "price": 180
-    },
-    {
-        "category": "Özel İçecek",
-        "product": "Su",
-        "price": 50
-    },
-    {
-        "category": "Özel İçecek",
-        "product": "Soda",
-        "price": 65
-    },
-    {
-        "category": "İndirimli Tatlı",
-        "product": "İndirimli Cookie",
-        "price": 175
-    },
-    {
-        "category": "İndirimli Tatlı",
-        "product": "İndirimli Kek",
-        "price": 220
-    },
-    {
-        "category": "Tatlı",
-        "product": "Cookie",
-        "price": 195
-    },
-    {
-        "category": "Tatlı",
-        "product": "Kek",
         "price": 240
     },
     {
-        "category": "Tatlı",
-        "product": "Mermer Kek",
-        "price": 150
+        "category": "Non-Coffee",
+        "product": "Hot Chocolate",
+        "price": 250
     },
     {
-        "category": "Tatlı",
-        "product": "Havuçlu Tarçınlı",
-        "price": 150
+        "category": "Non-Coffee",
+        "product": "Chai Tea Latte",
+        "price": 275
     },
     {
-        "category": "Paket Kahve",
-        "product": "100 Gr Türk Kahvesi",
-        "price": 150
+        "category": "Non-Coffee",
+        "product": "Iced Chai Tea Latte",
+        "price": 295
     },
     {
-        "category": "Paket Kahve",
-        "product": "250 Gr Türk Kahvesi",
+        "category": "Non-Coffee",
+        "product": "Rooibos Tea",
+        "price": 210
+    },
+    {
+        "category": "Non-Coffee",
+        "product": "Green Tea",
+        "price": 210
+    },
+    {
+        "category": "Non-Coffee",
+        "product": "Turkish Black Tea",
+        "price": 190
+    },
+    {
+        "category": "Refreshers",
+        "product": "Cool Lime",
+        "price": 265
+    },
+    {
+        "category": "Refreshers",
+        "product": "Raspberry Blueberry Acai",
+        "price": 265
+    },
+    {
+        "category": "Refreshers",
+        "product": "White Peach",
+        "price": 320
+    },
+    {
+        "category": "Refreshers",
+        "product": "Strawberry Hibiscus",
+        "price": 265
+    },
+    {
+        "category": "Refreshers",
+        "product": "Orange Mango",
+        "price": 265
+    },
+    {
+        "category": "Refreshers",
+        "product": "Kombucha",
+        "price": 295
+    },
+    {
+        "category": "Iced Coffees",
+        "product": "Iced Americano",
+        "price": 240
+    },
+    {
+        "category": "Iced Coffees",
+        "product": "Iced Latte",
+        "price": 280
+    },
+    {
+        "category": "Iced Coffees",
+        "product": "Iced Vanilla Latte",
+        "price": 320
+    },
+    {
+        "category": "Iced Coffees",
+        "product": "Iced Mocha",
+        "price": 350
+    },
+    {
+        "category": "Iced Coffees",
+        "product": "Iced White Choc. Mocha",
+        "price": 350
+    },
+    {
+        "category": "Iced Coffees",
+        "product": "Iced Spanish Latte",
+        "price": 320
+    },
+    {
+        "category": "Iced Coffees",
+        "product": "Iced Caramel Latte",
+        "price": 320
+    },
+    {
+        "category": "Iced Coffees",
+        "product": "Iced Pistachio Latte",
+        "price": 320
+    },
+    {
+        "category": "Iced Coffees",
+        "product": "Strawberry Iced Latte",
+        "price": 340
+    },
+    {
+        "category": "Iced Coffees",
+        "product": "Cold Brew Latte",
+        "price": 350
+    },
+    {
+        "category": "Iced Coffees",
+        "product": "Coconut Cold Brew",
+        "price": 375
+    },
+    {
+        "category": "Iced Coffees",
+        "product": "Orange Espresso Tonic",
         "price": 300
     },
     {
-        "category": "Paket Kahve",
-        "product": "Bonita",
-        "price": 1000
+        "category": "Water / Su",
+        "product": "Still Water (33 cl)",
+        "price": 65
     },
     {
-        "category": "Paket Kahve",
-        "product": "Indonesia",
-        "price": 900
+        "category": "Water / Su",
+        "product": "Still Water (75 cl)",
+        "price": 95
     },
     {
-        "category": "Paket Kahve",
-        "product": "Colombia",
-        "price": 550
+        "category": "Water / Su",
+        "product": "Sparkling Water / Soda",
+        "price": 90
     },
     {
-        "category": "Paket Kahve",
-        "product": "Rwanda",
-        "price": 550
+        "category": "Water / Su",
+        "product": "S. Pellegrino (25 cl)",
+        "price": 165
     },
     {
-        "category": "Paket Kahve",
-        "product": "Ethiopia",
-        "price": 600
+        "category": "Water / Su",
+        "product": "S. Pellegrino (75 cl)",
+        "price": 325
+    },
+    {
+        "category": "Water / Su",
+        "product": "Churchill",
+        "price": 140
+    },
+    {
+        "category": "Artisan Sandwiches",
+        "product": "Smoked Turkey & Kashar",
+        "price": 395
+    },
+    {
+        "category": "Bakery & Desserts",
+        "product": "Cherry Brownie",
+        "price": 325
+    },
+    {
+        "category": "Bakery & Desserts",
+        "product": "White Chocolate Brownie",
+        "price": 350
+    },
+    {
+        "category": "Bakery & Desserts",
+        "product": "Butter Croissant",
+        "price": 195
+    },
+    {
+        "category": "Bakery & Desserts",
+        "product": "Belgian Choc. Croissant",
+        "price": 195
+    },
+    {
+        "category": "Bakery & Desserts",
+        "product": "Cinnamon Roll",
+        "price": 350
+    },
+    {
+        "category": "Bakery & Desserts",
+        "product": "Chocolate Babka",
+        "price": 295
+    },
+    {
+        "category": "Bakery & Desserts",
+        "product": "Marble Cake",
+        "price": 180
+    },
+    {
+        "category": "Bakery & Desserts",
+        "product": "Carrot Cinnamon Cake",
+        "price": 275
+    },
+    {
+        "category": "Bakery & Desserts",
+        "product": "Blueberry Scone",
+        "price": 195
+    },
+    {
+        "category": "Bakery & Desserts",
+        "product": "Chocolate Chips Cookie",
+        "price": 195
+    },
+    {
+        "category": "Extras",
+        "product": "Plant-Based Milk (Oat/Almond/Coconut)",
+        "price": 85
+    },
+    {
+        "category": "Extras",
+        "product": "Extra Espresso Shot",
+        "price": 50
+    },
+    {
+        "category": "Extras",
+        "product": "Lactose-Free Milk",
+        "price": 0
+    },
+    {
+        "category": "Extras",
+        "product": "Decaf Option",
+        "price": 0
     }
 ];

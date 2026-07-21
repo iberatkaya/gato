@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./App.css";
 import { menuItems } from "./menu";
 import { LoginPage } from "./LoginPage";
@@ -39,9 +39,43 @@ function App() {
     return localStorage.getItem("current_user") || "";
   });
   const [currentOrder, setCurrentOrder] = useState<OrderItem[]>([]);
-  const [selectedProduct, setSelectedProduct] = useState<string>("");
+  const [recentlyAddedProducts, setRecentlyAddedProducts] = useState<
+    Record<string, number>
+  >({});
+  const productAnimationTimers = useRef<Record<string, number>>({});
   const [paymentMethod, setPaymentMethod] = useState<"cash" | "card">("cash");
   const [orderNote, setOrderNote] = useState<string>("");
+
+  useEffect(() => {
+    const timers = productAnimationTimers.current;
+
+    return () => {
+      Object.values(timers).forEach((timerId) => {
+        window.clearTimeout(timerId);
+      });
+    };
+  }, []);
+
+  const triggerProductAddedAnimation = (productName: string) => {
+    setRecentlyAddedProducts((prev) => ({
+      ...prev,
+      [productName]: (prev[productName] ?? 0) + 1,
+    }));
+
+    const existingTimer = productAnimationTimers.current[productName];
+    if (existingTimer) {
+      window.clearTimeout(existingTimer);
+    }
+
+    productAnimationTimers.current[productName] = window.setTimeout(() => {
+      setRecentlyAddedProducts((prev) => {
+        const next = { ...prev };
+        delete next[productName];
+        return next;
+      });
+      delete productAnimationTimers.current[productName];
+    }, 500);
+  };
 
   // Use Firestore hook for orders management with localStorage fallback
   const {
@@ -56,14 +90,11 @@ function App() {
     "order" | "tables" | "history" | "analytics"
   >("order");
 
-  const addProductToOrder = () => {
-    if (!selectedProduct) return;
-
-    const menuItem = menuItems.find((item) => item.product === selectedProduct);
-    if (!menuItem) return;
+  const addProductToOrder = (menuItem: MenuItem) => {
+    triggerProductAddedAnimation(menuItem.product);
 
     const existingItemIndex = currentOrder.findIndex(
-      (item) => item.product === selectedProduct,
+      (item) => item.product === menuItem.product,
     );
 
     if (existingItemIndex >= 0) {
@@ -80,7 +111,6 @@ function App() {
         },
       ]);
     }
-    setSelectedProduct("");
   };
 
   const updateQuantity = (index: number, delta: number) => {
@@ -165,6 +195,14 @@ function App() {
       return acc;
     },
     {} as Record<string, MenuItem[]>,
+  );
+
+  const orderedMenuCategories = Object.entries(groupedMenu).sort(
+    ([categoryA], [categoryB]) => {
+      if (categoryA === "Iced Coffees") return -1;
+      if (categoryB === "Iced Coffees") return 1;
+      return 0;
+    },
   );
 
   const handleLogin = (username: string) => {
@@ -265,116 +303,122 @@ function App() {
         <>
           <h2 className="page-title">Sipariş Ekranı</h2>
 
-          {/* Product Selection */}
-          <div className="product-selector">
-            <select
-              value={selectedProduct}
-              onChange={(e) => setSelectedProduct(e.target.value)}
-            >
-              <option value="">Ürün Seçin...</option>
-              {Object.entries(groupedMenu).map(([category, items]) => (
-                <optgroup key={category} label={category}>
-                  {items.map((item) => (
-                    <option key={item.product} value={item.product}>
-                      {item.product} - {item.price} TL
-                    </option>
-                  ))}
-                </optgroup>
-              ))}
-            </select>
-            <button onClick={addProductToOrder} className="add-button">
-              Ekle
-            </button>
-          </div>
-
           {/* Current Order */}
-          {currentOrder.length > 0 && (
-            <div className="order-card">
-              <h3 className="section-title">Mevcut Sipariş</h3>
-              {currentOrder.map((item, index) => (
-                <div key={index} className="order-item">
-                  <span className="order-item-name">{item.product}</span>
-                  <div className="order-item-controls">
+          <div className="order-card">
+            <h3 className="section-title order-card-title">Mevcut Sipariş</h3>
+            {currentOrder.length === 0 ? (
+              <p className="order-empty-inline">
+                Ürün eklediğinizde sipariş detayları burada görünecek.
+              </p>
+            ) : (
+              <>
+                {currentOrder.map((item, index) => (
+                  <div key={index} className="order-item">
+                    <span className="order-item-name">{item.product}</span>
+                    <div className="order-item-controls">
+                      <button
+                        onClick={() => updateQuantity(index, -1)}
+                        className="quantity-button minus"
+                      >
+                        -
+                      </button>
+                      <span className="quantity-display">{item.quantity}</span>
+                      <button
+                        onClick={() => updateQuantity(index, 1)}
+                        className="quantity-button plus"
+                      >
+                        +
+                      </button>
+                      <span className="item-price">
+                        {item.price * item.quantity} TL
+                      </span>
+                    </div>
+                  </div>
+                ))}
+
+                <div className="order-total">
+                  <h3>Toplam: {calculateTotal()} TL</h3>
+                </div>
+
+                {/* Display note preview if note exists */}
+                {orderNote.trim() && (
+                  <div className="current-order-note">
+                    <strong>Not:</strong> {orderNote}
+                  </div>
+                )}
+
+                {/* Payment Method */}
+                <div className="payment-section">
+                  <h4>Ödeme Yöntemi:</h4>
+                  <div className="payment-buttons">
                     <button
-                      onClick={() => updateQuantity(index, -1)}
-                      className="quantity-button minus"
+                      onClick={() => setPaymentMethod("cash")}
+                      className={`payment-button ${paymentMethod === "cash" ? "active" : "inactive"}`}
                     >
-                      -
+                      Nakit Alındı
                     </button>
-                    <span className="quantity-display">{item.quantity}</span>
                     <button
-                      onClick={() => updateQuantity(index, 1)}
-                      className="quantity-button plus"
+                      onClick={() => setPaymentMethod("card")}
+                      className={`payment-button ${paymentMethod === "card" ? "active" : "inactive"}`}
                     >
-                      +
+                      Kart Alındı
                     </button>
-                    <span className="item-price">
-                      {item.price * item.quantity} TL
-                    </span>
                   </div>
                 </div>
-              ))}
 
-              <div className="order-total">
-                <h3>Toplam: {calculateTotal()} TL</h3>
-              </div>
-
-              {/* Display note preview if note exists */}
-              {orderNote.trim() && (
-                <div className="current-order-note">
-                  <strong>Not:</strong> {orderNote}
+                {/* Order Note */}
+                <div className="note-section">
+                  <h4>Not (İsteğe Bağlı):</h4>
+                  <textarea
+                    value={orderNote}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (value.length <= 300) {
+                        setOrderNote(value);
+                      }
+                    }}
+                    placeholder="Sipariş ile ilgili not ekleyebilirsiniz..."
+                    maxLength={300}
+                    rows={2}
+                    className="note-input"
+                  />
+                  <div className="note-counter">
+                    {orderNote.length}/300 karakter
+                  </div>
                 </div>
-              )}
 
-              {/* Payment Method */}
-              <div className="payment-section">
-                <h4>Ödeme Yöntemi:</h4>
-                <div className="payment-buttons">
-                  <button
-                    onClick={() => setPaymentMethod("cash")}
-                    className={`payment-button ${paymentMethod === "cash" ? "active" : "inactive"}`}
-                  >
-                    Nakit Alındı
-                  </button>
-                  <button
-                    onClick={() => setPaymentMethod("card")}
-                    className={`payment-button ${paymentMethod === "card" ? "active" : "inactive"}`}
-                  >
-                    Kart Alındı
-                  </button>
+                <button
+                  onClick={placeOrder}
+                  className="submit-button"
+                  disabled={firestoreLoading}
+                >
+                  {firestoreLoading ? "İşleniyor..." : "Siparişi Tamamla"}
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* Product Selection */}
+          <div className="menu-browser">
+            {orderedMenuCategories.map(([category, items]) => (
+              <section key={category} className="menu-category-card">
+                <h3 className="menu-category-title">{category}</h3>
+                <div className="menu-items-grid">
+                  {items.map((item) => (
+                    <button
+                      key={item.product}
+                      type="button"
+                      className={`menu-item-button ${recentlyAddedProducts[item.product] ? "added" : ""}`}
+                      onClick={() => addProductToOrder(item)}
+                    >
+                      <span className="menu-item-name">{item.product}</span>
+                      <span className="menu-item-price">{item.price} TL</span>
+                    </button>
+                  ))}
                 </div>
-              </div>
-
-              {/* Order Note */}
-              <div className="note-section">
-                <h4>Not (İsteğe Bağlı):</h4>
-                <textarea
-                  value={orderNote}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    if (value.length <= 300) {
-                      setOrderNote(value);
-                    }
-                  }}
-                  placeholder="Sipariş ile ilgili not ekleyebilirsiniz..."
-                  maxLength={300}
-                  rows={3}
-                  className="note-input"
-                />
-                <div className="note-counter">
-                  {orderNote.length}/300 karakter
-                </div>
-              </div>
-
-              <button
-                onClick={placeOrder}
-                className="submit-button"
-                disabled={firestoreLoading}
-              >
-                {firestoreLoading ? "İşleniyor..." : "Siparişi Tamamla"}
-              </button>
-            </div>
-          )}
+              </section>
+            ))}
+          </div>
         </>
       ) : view === "tables" ? (
         <TableManagement />

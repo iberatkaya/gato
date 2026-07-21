@@ -149,6 +149,137 @@
   font-weight: 500;
 }
 
+.menu-browser {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.menu-category-card {
+  background-color: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(244, 208, 111, 0.3);
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.menu-category-title {
+  margin: 0 0 12px 0;
+  color: #f4d06f;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+.menu-items-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px;
+}
+
+.menu-item-button {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(244, 208, 111, 0.35);
+  background-color: rgba(255, 255, 255, 0.95);
+  color: #2d5432;
+  border-radius: 10px;
+  padding: 10px 12px;
+  text-align: left;
+  min-height: 72px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 6px;
+  cursor: pointer;
+  transition: transform 0.16s ease, box-shadow 0.16s ease,
+    background-color 0.16s ease;
+}
+
+.menu-item-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  background-color: #fffaf0;
+}
+
+.menu-item-button:active {
+  transform: translateY(0);
+}
+
+.menu-item-button.added {
+  animation: itemAddedPulse 0.5s ease;
+  border-color: #f4d06f;
+  box-shadow: 0 0 0 2px rgba(244, 208, 111, 0.35),
+    0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.menu-item-button.added::after {
+  content: "Eklendi";
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 7px;
+  border-radius: 999px;
+  color: #2d5432;
+  background-color: #f4d06f;
+  animation: addedBadgeFade 0.5s ease;
+}
+
+@keyframes itemAddedPulse {
+  0% {
+    transform: scale(1);
+    background-color: rgba(255, 255, 255, 0.95);
+  }
+  45% {
+    transform: scale(1.02);
+    background-color: #fff4cf;
+  }
+  100% {
+    transform: scale(1);
+    background-color: rgba(255, 255, 255, 0.95);
+  }
+}
+
+@keyframes addedBadgeFade {
+  0% {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  20% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.menu-item-name {
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.menu-item-price {
+  color: #1e3f2a;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+@media (max-width: 640px) {
+  .menu-items-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  }
+
+  .menu-item-button {
+    min-height: 64px;
+    padding: 9px 10px;
+  }
+}
+
 .add-button {
   background-color: #f4d06f;
   color: #2d5432;
@@ -162,21 +293,36 @@
 
 .order-card {
   background-color: #ffffff;
-  padding: 20px;
+  padding: 14px;
   border-radius: 12px;
-  margin-bottom: 20px;
+  margin-bottom: 14px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   border-top: 4px solid #f4d06f;
+}
+
+.order-card-title {
+  margin-bottom: 10px;
+  font-size: 1.2rem;
+}
+
+.order-empty-inline {
+  margin: 0;
+  color: #2d5432;
+  background-color: rgba(244, 208, 111, 0.12);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 0.92rem;
 }
 
 .order-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px;
+  gap: 10px;
+  padding: 8px 10px;
   background-color: rgba(244, 208, 111, 0.08);
   color: #2d5432;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   border-radius: 8px;
   font-weight: 500;
   border-left: 3px solid #f4d06f;
@@ -185,20 +331,22 @@
 .order-item-name {
   flex: 1;
   text-align: left;
+  font-size: 0.95rem;
+  line-height: 1.2;
 }
 
 .order-item-controls {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .quantity-button {
-  padding: 6px 14px;
+  padding: 4px 10px;
   border-radius: 6px;
   font-weight: 600;
   color: white;
-  min-width: 36px;
+  min-width: 30px;
 }
 
 .quantity-button.minus {
@@ -218,39 +366,42 @@
 }
 
 .quantity-display {
-  min-width: 30px;
+  min-width: 22px;
   text-align: center;
   font-weight: 600;
   color: #2d5432;
+  font-size: 0.92rem;
 }
 
 .item-price {
-  min-width: 80px;
+  min-width: 72px;
   text-align: right;
   font-weight: 600;
   color: #2d5432;
-  font-size: 1.05rem;
+  font-size: 0.95rem;
 }
 
 .order-total {
-  margin-top: 20px;
-  padding-top: 20px;
+  margin-top: 12px;
+  padding-top: 12px;
   border-top: 2px solid #f4d06f;
 }
 
 .order-total h3 {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   text-align: center;
   color: #f4d06f;
+  margin: 0;
 }
 
 .payment-section {
-  margin-top: 20px;
+  margin-top: 12px;
 }
 
 .payment-section h4 {
-  margin-bottom: 10px;
+  margin: 0 0 8px;
   color: #1e3f2a;
+  font-size: 0.95rem;
 }
 
 .payment-buttons {
@@ -289,9 +440,9 @@
 }
 
 .submit-button {
-  margin-top: 20px;
-  padding: 16px 32px;
-  font-size: 1.1rem;
+  margin-top: 12px;
+  padding: 12px 20px;
+  font-size: 0.98rem;
   font-weight: 600;
   background-color: #f4d06f;
   color: #2d5432;
@@ -451,32 +602,35 @@
   }
 
   .order-card {
-    padding: 14px;
-    margin-bottom: 14px;
+    padding: 12px;
+    margin-bottom: 12px;
   }
 
   .order-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-    padding: 10px;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
     margin-bottom: 8px;
   }
 
   .order-item-name {
-    width: 100%;
-    margin-bottom: 8px;
+    width: auto;
+    margin-bottom: 0;
+    font-size: 0.9rem;
   }
 
   .order-item-controls {
-    width: 100%;
-    justify-content: space-between;
+    width: auto;
+    justify-content: flex-end;
+    gap: 6px;
   }
 
   .item-price {
-    min-width: auto;
-    flex: 1;
+    min-width: 64px;
+    flex: 0;
     text-align: right;
+    font-size: 0.9rem;
   }
 
   .payment-buttons {
@@ -528,20 +682,21 @@
 
 /* Note Section Styles */
 .note-section {
-  margin-top: 20px;
+  margin-top: 12px;
 }
 
 .note-section h4 {
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   color: #1e4230;
+  font-size: 0.92rem;
 }
 
 .note-input {
   width: 100%;
-  padding: 12px;
+  padding: 10px;
   border: 2px solid #e0e0e0;
   border-radius: 8px;
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   font-family: inherit;
   resize: vertical;
   transition: border-color 0.2s;
@@ -559,9 +714,9 @@
 
 .note-counter {
   text-align: right;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: #666;
-  margin-top: 5px;
+  margin-top: 4px;
 }
 
 .history-note {

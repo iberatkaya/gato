@@ -1,5 +1,5 @@
 #root {
-  max-width: 800px;
+  max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
 }
@@ -147,6 +147,48 @@
   font-size: 1rem;
   min-width: 300px;
   font-weight: 500;
+}
+
+.order-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-areas:
+    "order"
+    "menu";
+  gap: 14px;
+  align-items: start;
+}
+
+.order-panel,
+.menu-panel {
+  min-width: 0;
+}
+
+.order-panel {
+  grid-area: order;
+}
+
+.menu-panel {
+  grid-area: menu;
+}
+
+@media (min-width: 1080px) {
+  .order-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 360px);
+    grid-template-areas: "menu order";
+    gap: 16px;
+  }
+
+  .order-panel {
+    position: sticky;
+    top: 12px;
+    align-self: start;
+  }
+
+  .order-panel .order-card {
+    max-height: calc(100vh - 24px);
+    overflow: auto;
+  }
 }
 
 .menu-browser {

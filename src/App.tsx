@@ -43,7 +43,7 @@ function App() {
     Record<string, number>
   >({});
   const productAnimationTimers = useRef<Record<string, number>>({});
-  const [paymentMethod, setPaymentMethod] = useState<"cash" | "card">("cash");
+  const [paymentMethod, setPaymentMethod] = useState<"cash" | "card">("card");
   const [orderNote, setOrderNote] = useState<string>("");
 
   useEffect(() => {
@@ -197,10 +197,29 @@ function App() {
     {} as Record<string, MenuItem[]>,
   );
 
+  const priorityCategoryOrder = [
+    "Iced Coffees",
+    "Hot Coffees",
+    "Water / Su",
+    "Bakery & Desserts",
+    "Espresso Bar",
+    "Brew Bar",
+  ];
+
+  const priorityCategoryIndex = new Map(
+    priorityCategoryOrder.map((category, index) => [category, index]),
+  );
+
   const orderedMenuCategories = Object.entries(groupedMenu).sort(
     ([categoryA], [categoryB]) => {
-      if (categoryA === "Iced Coffees") return -1;
-      if (categoryB === "Iced Coffees") return 1;
+      const indexA = priorityCategoryIndex.get(categoryA);
+      const indexB = priorityCategoryIndex.get(categoryB);
+
+      if (indexA !== undefined && indexB !== undefined) {
+        return indexA - indexB;
+      }
+      if (indexA !== undefined) return -1;
+      if (indexB !== undefined) return 1;
       return 0;
     },
   );

@@ -356,6 +356,56 @@ export const menuItems: MenuItem[] = [
         "price": 195
     },
     {
+        "category": "Çekirdek kahveler",
+        "product": "Colombia",
+        "price": 650
+    },
+    {
+        "category": "Çekirdek kahveler",
+        "product": "Guatemala",
+        "price": 600
+    },
+    {
+        "category": "Çekirdek kahveler",
+        "product": "Ethiopia",
+        "price": 800
+    },
+    {
+        "category": "Çekirdek kahveler",
+        "product": "Rwanda",
+        "price": 750
+    },
+    {
+        "category": "Çekirdek kahveler",
+        "product": "Colombia La Reserva",
+        "price": 1200
+    },
+    {
+        "category": "Çekirdek kahveler",
+        "product": "Noite Citrus Melon",
+        "price": 1200
+    },
+    {
+        "category": "Çekirdek kahveler",
+        "product": "House Espresso 500 Gr",
+        "price": 850
+    },
+    {
+        "category": "Çekirdek kahveler",
+        "product": "House Espresso 250 Gr",
+        "price": 500
+    },
+    {
+        "category": "Kampanyalar",
+        "product": "Kuruvasan + Americano",
+        "price": 275
+    },
+    {
+        "category": "Kampanyalar",
+        "product": "Kuruvasan + Filtre Kahve",
+        "price": 275
+    },
+    {
         "category": "Extras",
         "product": "Plant-Based Milk (Oat/Almond/Coconut)",
         "price": 85

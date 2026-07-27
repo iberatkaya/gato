@@ -319,8 +319,7 @@ export function Analytics() {
 
   const topProducts = Object.entries(allProducts)
     .map(([product, quantity]) => ({ product, quantity }))
-    .sort((a, b) => b.quantity - a.quantity)
-    .slice(0, 10);
+    .sort((a, b) => b.quantity - a.quantity);
 
   return (
     <div className="analytics-container">
@@ -513,7 +512,7 @@ export function Analytics() {
           </div>
 
           <div className="chart-container full-width">
-            <h3>En Çok Satılan Ürünler (Top 10)</h3>
+            <h3>Satılan Ürünler (1+)</h3>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={topProducts}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -541,8 +540,7 @@ export function Analytics() {
           {dailyAggregates.map((day) => {
             const topDayItems = Object.entries(day.itemCounts)
               .map(([product, quantity]) => ({ product, quantity }))
-              .sort((a, b) => b.quantity - a.quantity)
-              .slice(0, 5);
+              .sort((a, b) => b.quantity - a.quantity);
 
             return (
               <div key={day.date} className="daily-card">
@@ -576,7 +574,7 @@ export function Analytics() {
                 </div>
 
                 <div className="daily-items">
-                  <h4>En Çok Satılan Ürünler:</h4>
+                  <h4>Satılan Ürünler (1+):</h4>
                   {topDayItems.map((item, index) => (
                     <div key={index} className="item-row">
                       <span className="item-name">{item.product}</span>

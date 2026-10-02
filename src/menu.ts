@@ -356,6 +356,31 @@ export const menuItems: MenuItem[] = [
         "price": 195
     },
     {
+        "category": "Toasts",
+        "product": "Susurluk Toast",
+        "price": 380
+    },
+    {
+        "category": "Toasts",
+        "product": "White Cheese, Tomato, Oregano Toast",
+        "price": 300
+    },
+    {
+        "category": "Toasts",
+        "product": "Smoked Turkey, Kaşar, Pesto Toast",
+        "price": 350
+    },
+    {
+        "category": "Toasts",
+        "product": "Slow-Cooked Beef, Kaşar Toast",
+        "price": 450
+    },
+    {
+        "category": "Toasts",
+        "product": "Turkish Sucuk & Kaşar Toast",
+        "price": 320
+    },
+    {
         "category": "Çekirdek kahveler",
         "product": "Colombia",
         "price": 650
@@ -409,6 +434,11 @@ export const menuItems: MenuItem[] = [
         "category": "Extras",
         "product": "Plant-Based Milk (Oat/Almond/Coconut)",
         "price": 85
+    },
+    {
+        "category": "Extras",
+        "product": "Protein Bar",
+        "price": 160
     },
     {
         "category": "Extras",

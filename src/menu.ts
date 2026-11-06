@@ -73,12 +73,17 @@ export const menuItems: MenuItem[] = [
     {
         "category": "Hot Coffees",
         "product": "Caffe Latte",
-        "price": 250
+        "price": 230
     },
     {
         "category": "Hot Coffees",
         "product": "Vanilla Latte",
-        "price": 250
+        "price": 310
+    },
+    {
+        "category": "Hot Coffees",
+        "product": "Hazelnut Latte",
+        "price": 310
     },
     {
         "category": "Hot Coffees",
@@ -98,12 +103,12 @@ export const menuItems: MenuItem[] = [
     {
         "category": "Hot Coffees",
         "product": "Mocha",
-        "price": 290
+        "price": 375
     },
     {
         "category": "Hot Coffees",
         "product": "White Chocolate Mocha",
-        "price": 290
+        "price": 375
     },
     {
         "category": "Hot Coffees",
@@ -118,32 +123,32 @@ export const menuItems: MenuItem[] = [
     {
         "category": "Matcha",
         "product": "Matcha Latte",
-        "price": 300
-    },
-    {
-        "category": "Matcha",
-        "product": "Iced Matcha Latte",
         "price": 320
     },
     {
         "category": "Matcha",
+        "product": "Iced Matcha Latte",
+        "price": 340
+    },
+    {
+        "category": "Matcha",
         "product": "Iced Strawberry Matcha",
-        "price": 380
+        "price": 400
     },
     {
         "category": "Matcha",
         "product": "Iced Vanilla Matcha",
-        "price": 360
+        "price": 380
     },
     {
         "category": "Matcha",
         "product": "Coconut Matcha Latte",
-        "price": 350
+        "price": 370
     },
     {
         "category": "Matcha",
         "product": "Pistachio Matcha Latte",
-        "price": 400
+        "price": 420
     },
     {
         "category": "Non-Coffee",
@@ -258,7 +263,7 @@ export const menuItems: MenuItem[] = [
     {
         "category": "Iced Coffees",
         "product": "Cold Brew Latte",
-        "price": 350
+        "price": 330
     },
     {
         "category": "Iced Coffees",
@@ -267,7 +272,12 @@ export const menuItems: MenuItem[] = [
     },
     {
         "category": "Iced Coffees",
-        "product": "Orange Espresso Tonic",
+        "product": "Iced Filter Coffee",
+        "price": 300
+    },
+    {
+        "category": "Iced Coffees",
+        "product": "Fresh Orange Juice Espresso",
         "price": 300
     },
     {
@@ -402,6 +412,11 @@ export const menuItems: MenuItem[] = [
     },
     {
         "category": "Çekirdek kahveler",
+        "product": "Peru",
+        "price": 1100
+    },
+    {
+        "category": "Çekirdek kahveler",
         "product": "Colombia La Reserva",
         "price": 1200
     },
@@ -423,12 +438,17 @@ export const menuItems: MenuItem[] = [
     {
         "category": "Kampanyalar",
         "product": "Kuruvasan + Americano",
-        "price": 275
+        "price": 300
     },
     {
         "category": "Kampanyalar",
         "product": "Kuruvasan + Filtre Kahve",
-        "price": 275
+        "price": 300
+    },
+    {
+        "category": "Kampanyalar",
+        "product": "Kuruvasan + Latte",
+        "price": 350
     },
     {
         "category": "Extras",

@@ -45,6 +45,7 @@ function App() {
   const productAnimationTimers = useRef<Record<string, number>>({});
   const [paymentMethod, setPaymentMethod] = useState<"cash" | "card">("card");
   const [orderNote, setOrderNote] = useState<string>("");
+  const [orderDiscount, setOrderDiscount] = useState<number>(0);
 
   useEffect(() => {
     const timers = productAnimationTimers.current;
@@ -124,11 +125,31 @@ function App() {
     setCurrentOrder(updatedOrder);
   };
 
-  const calculateTotal = () => {
+  const calculateSubtotal = () => {
     return currentOrder.reduce(
       (sum, item) => sum + item.price * item.quantity,
       0,
     );
+  };
+
+  const calculateTotal = () => {
+    return Math.max(0, calculateSubtotal() - orderDiscount);
+  };
+
+  const handleDiscountChange = (value: string) => {
+    const sanitizedValue = value.replace(/\D/g, "");
+
+    if (sanitizedValue === "") {
+      setOrderDiscount(0);
+      return;
+    }
+
+    const parsedValue = Number(sanitizedValue);
+    if (Number.isNaN(parsedValue)) {
+      return;
+    }
+
+    setOrderDiscount(Math.max(0, parsedValue));
   };
 
   const placeOrder = async () => {
@@ -155,18 +176,21 @@ function App() {
 
       console.log("Saving order with date and time:", dateTimeStr);
 
+      const finalTotal = calculateTotal();
       const newOrder: Omit<Order, "id"> = {
         items: [...currentOrder],
-        total: calculateTotal(),
+        total: finalTotal,
         paymentMethod,
         date: dateTimeStr,
         ...(orderNote.trim() && { note: orderNote.trim() }),
+        ...(orderDiscount > 0 && { discountAmount: orderDiscount }),
       };
 
       console.log("Order object:", newOrder);
       await addNewOrder(newOrder);
       setCurrentOrder([]);
       setOrderNote("");
+      setOrderDiscount(0);
       alert("Sipariş başarıyla kaydedildi!");
     } catch (error) {
       console.error("Error placing order:", error);
@@ -359,8 +383,41 @@ function App() {
                       </div>
                     ))}
 
+                    <div className="discount-section">
+                      <label
+                        htmlFor="order-discount"
+                        className="discount-label"
+                      >
+                        İndirim (TL)
+                      </label>
+                      <input
+                        id="order-discount"
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        value={orderDiscount === 0 ? "" : String(orderDiscount)}
+                        onChange={(e) => handleDiscountChange(e.target.value)}
+                        className="discount-input"
+                        placeholder="0"
+                      />
+                    </div>
+
                     <div className="order-total">
                       <h3>Toplam: {calculateTotal()} TL</h3>
+                      {orderDiscount > 0 && (
+                        <div className="order-strike-total">
+                          <span>Eski fiyat</span>
+                          <span className="strikethrough">
+                            {calculateSubtotal()} TL
+                          </span>
+                        </div>
+                      )}
+                      {orderDiscount > 0 && (
+                        <div className="order-discount-total">
+                          <span>İndirim</span>
+                          <span>-{orderDiscount} TL</span>
+                        </div>
+                      )}
                     </div>
 
                     {/* Display note preview if note exists */}
@@ -460,20 +517,36 @@ function App() {
             <div className="history-list">
               {orders.map((order) => {
                 return (
-                  <div key={order.id} className="history-item">
+                  <div
+                    key={order.id}
+                    className={`history-item ${order.discountAmount ? "has-discount" : ""}`}
+                  >
                     <div className="history-header">
-                      <div>
+                      <div className="history-date">
                         <strong>Tarih:</strong> {order.date}
                       </div>
-                      <div>
-                        <strong>Ödeme:</strong>{" "}
-                        {order.paymentMethod === "cash" ? "Nakit" : "Kart"}
-                      </div>
-                      {order.source === "table" && (
-                        <div>
-                          <strong>Kaynak:</strong> Masa {order.tableId ?? "-"}
+
+                      <div className="history-header-right">
+                        {order.discountAmount ? (
+                          <div
+                            className="history-discount-badge"
+                            title="İndirimli sipariş"
+                          >
+                            %
+                          </div>
+                        ) : null}
+
+                        <div className="history-payment">
+                          <strong>Ödeme:</strong>{" "}
+                          {order.paymentMethod === "cash" ? "Nakit" : "Kart"}
                         </div>
-                      )}
+
+                        {order.source === "table" && (
+                          <div className="history-source">
+                            <strong>Kaynak:</strong> Masa {order.tableId ?? "-"}
+                          </div>
+                        )}
+                      </div>
                     </div>
 
                     {order.loyaltyDiscount && (

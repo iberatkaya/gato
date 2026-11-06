@@ -181,6 +181,31 @@ export const menuItems: MenuItem[] = [
         "price": 190
     },
     {
+        "category": "Tea",
+        "product": "Sweet Dreams",
+        "price": 275
+    },
+    {
+        "category": "Tea",
+        "product": "Turmeric Blend",
+        "price": 275
+    },
+    {
+        "category": "Tea",
+        "product": "Yeşil Çay",
+        "price": 210
+    },
+    {
+        "category": "Tea",
+        "product": "Milk Oolong",
+        "price": 275
+    },
+    {
+        "category": "Tea",
+        "product": "Rooibos Vanilya",
+        "price": 210
+    },
+    {
         "category": "Refreshers",
         "product": "Cool Lime",
         "price": 265

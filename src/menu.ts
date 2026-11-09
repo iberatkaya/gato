@@ -73,12 +73,17 @@ export const menuItems: MenuItem[] = [
     {
         "category": "Hot Coffees",
         "product": "Caffe Latte",
-        "price": 230
+        "price": 250
     },
     {
         "category": "Hot Coffees",
         "product": "Vanilla Latte",
-        "price": 250
+        "price": 310
+    },
+    {
+        "category": "Hot Coffees",
+        "product": "Hazelnut Latte",
+        "price": 310
     },
     {
         "category": "Hot Coffees",
@@ -98,12 +103,12 @@ export const menuItems: MenuItem[] = [
     {
         "category": "Hot Coffees",
         "product": "Mocha",
-        "price": 290
+        "price": 375
     },
     {
         "category": "Hot Coffees",
         "product": "White Chocolate Mocha",
-        "price": 290
+        "price": 375
     },
     {
         "category": "Hot Coffees",

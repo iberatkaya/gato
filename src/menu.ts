@@ -73,7 +73,7 @@ export const menuItems: MenuItem[] = [
     {
         "category": "Hot Coffees",
         "product": "Caffe Latte",
-        "price": 230
+        "price": 250
     },
     {
         "category": "Hot Coffees",

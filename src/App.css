@@ -712,6 +712,17 @@
   color: #1e4230;
 }
 
+.history-daily-running-total {
+  margin-top: 6px;
+  font-size: 0.9rem;
+  color: #1e3f2a;
+  background: rgba(30, 63, 42, 0.06);
+  border: 1px solid rgba(30, 63, 42, 0.15);
+  border-radius: 8px;
+  padding: 6px 10px;
+  display: inline-block;
+}
+
 .delete-button {
   background-color: #c77c4a;
   color: white;
@@ -738,6 +749,37 @@
   color: rgba(255, 255, 255, 0.7);
   padding: 40px;
   font-size: 1.1rem;
+}
+
+.history-pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 18px;
+}
+
+.history-load-more {
+  background-color: #1e4230;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.history-load-more:hover:not(:disabled) {
+  background-color: #2a5b41;
+}
+
+.history-load-more:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.history-end {
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.95rem;
 }
 
 /* Mobile Responsive Styles */

@@ -29,6 +29,9 @@ interface Order {
   tableName?: string;
   loyaltyDiscount?: boolean;
   discountAmount?: number;
+  dailyRevenueBefore?: number;
+  dailyRevenueAfter?: number;
+  dailyRevenueDelta?: number;
 }
 
 function App() {
@@ -49,6 +52,23 @@ function App() {
   const [quickDiscountPercent, setQuickDiscountPercent] = useState<
     15 | 25 | null
   >(null);
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false);
+
+  const {
+    orders,
+    loading: historyLoading,
+    error: firestoreError,
+    hasMore,
+    isHistoryLoaded,
+    loadInitialOrders,
+    loadMoreOrders,
+    addNewOrder,
+    removeOrder,
+  } = useFirestoreOrders();
+
+  const [view, setView] = useState<
+    "order" | "tables" | "history" | "analytics"
+  >("order");
 
   useEffect(() => {
     const timers = productAnimationTimers.current;
@@ -59,6 +79,12 @@ function App() {
       });
     };
   }, []);
+
+  useEffect(() => {
+    if (view === "history" && !isHistoryLoaded) {
+      void loadInitialOrders();
+    }
+  }, [isHistoryLoaded, loadInitialOrders, view]);
 
   const triggerProductAddedAnimation = (productName: string) => {
     setRecentlyAddedProducts((prev) => ({
@@ -80,19 +106,6 @@ function App() {
       delete productAnimationTimers.current[productName];
     }, 500);
   };
-
-  // Use Firestore hook for orders management with localStorage fallback
-  const {
-    orders,
-    loading: firestoreLoading,
-    error: firestoreError,
-    addNewOrder,
-    removeOrder,
-  } = useFirestoreOrders();
-
-  const [view, setView] = useState<
-    "order" | "tables" | "history" | "analytics"
-  >("order");
 
   const addProductToOrder = (menuItem: MenuItem) => {
     triggerProductAddedAnimation(menuItem.product);
@@ -177,28 +190,24 @@ function App() {
   };
 
   const placeOrder = async () => {
-    if (currentOrder.length === 0) return;
+    if (currentOrder.length === 0 || isPlacingOrder) return;
+
+    setIsPlacingOrder(true);
 
     try {
-      // Get current date and time in Turkish timezone (Europe/Istanbul)
       const now = new Date();
-
-      // Get the date and time components in Turkish timezone
       const turkishDateTime = new Date(
         now.toLocaleString("en-US", {
           timeZone: "Europe/Istanbul",
         }),
       );
 
-      // Format as YYYY-MM-DD HH:MM
       const year = turkishDateTime.getFullYear();
       const month = String(turkishDateTime.getMonth() + 1).padStart(2, "0");
       const day = String(turkishDateTime.getDate()).padStart(2, "0");
       const hours = String(turkishDateTime.getHours()).padStart(2, "0");
       const minutes = String(turkishDateTime.getMinutes()).padStart(2, "0");
       const dateTimeStr = `${year}-${month}-${day} ${hours}:${minutes}`;
-
-      console.log("Saving order with date and time:", dateTimeStr);
 
       const finalTotal = calculateTotal();
       const appliedDiscountAmount = calculateDiscountAmount();
@@ -213,7 +222,6 @@ function App() {
         }),
       };
 
-      console.log("Order object:", newOrder);
       await addNewOrder(newOrder);
       setCurrentOrder([]);
       setOrderNote("");
@@ -222,7 +230,13 @@ function App() {
       alert("Sipariş başarıyla kaydedildi!");
     } catch (error) {
       console.error("Error placing order:", error);
-      alert("Sipariş kaydedilirken hata oluştu. Lütfen tekrar deneyin.");
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Unknown error while saving order";
+      alert(`Sipariş kaydedilirken hata oluştu: ${errorMessage}`);
+    } finally {
+      setIsPlacingOrder(false);
     }
   };
 
@@ -237,7 +251,6 @@ function App() {
     }
   };
 
-  // Group menu items by category
   const groupedMenu = menuItems.reduce(
     (acc, item) => {
       if (!acc[item.category]) {
@@ -473,14 +486,12 @@ function App() {
                       )}
                     </div>
 
-                    {/* Display note preview if note exists */}
                     {orderNote.trim() && (
                       <div className="current-order-note">
                         <strong>Not:</strong> {orderNote}
                       </div>
                     )}
 
-                    {/* Payment Method */}
                     <div className="payment-section">
                       <h4>Ödeme Yöntemi:</h4>
                       <div className="payment-buttons">
@@ -499,7 +510,6 @@ function App() {
                       </div>
                     </div>
 
-                    {/* Order Note */}
                     <div className="note-section">
                       <h4>Not (İsteğe Bağlı):</h4>
                       <textarea
@@ -523,16 +533,15 @@ function App() {
                     <button
                       onClick={placeOrder}
                       className="submit-button"
-                      disabled={firestoreLoading}
+                      disabled={isPlacingOrder || currentOrder.length === 0}
                     >
-                      {firestoreLoading ? "İşleniyor..." : "Siparişi Tamamla"}
+                      {isPlacingOrder ? "İşleniyor..." : "Siparişi Tamamla"}
                     </button>
                   </>
                 )}
               </div>
             </section>
 
-            {/* Product Selection */}
             <section className="menu-panel">
               <div className="menu-browser">
                 {orderedMenuCategories.map(([category, items]) => (
@@ -564,103 +573,135 @@ function App() {
       ) : view === "history" ? (
         <>
           <h2 className="page-title">Sipariş Geçmişi</h2>
-          {orders.length === 0 ? (
+          {!isHistoryLoaded && historyLoading ? (
+            <p className="empty-state">Siparişler yükleniyor...</p>
+          ) : orders.length === 0 ? (
             <p className="empty-state">Henüz sipariş bulunmamaktadır.</p>
           ) : (
-            <div className="history-list">
-              {orders.map((order) => {
-                return (
-                  <div
-                    key={order.id}
-                    className={`history-item ${order.discountAmount ? "has-discount" : ""}`}
+            <div>
+              <div className="history-list">
+                {orders.map((order) => {
+                  return (
+                    <div
+                      key={order.id}
+                      className={`history-item ${order.discountAmount ? "has-discount" : ""}`}
+                    >
+                      <div className="history-header">
+                        <div className="history-date">
+                          <strong>Tarih:</strong> {order.date}
+                        </div>
+
+                        <div className="history-header-right">
+                          {order.discountAmount ? (
+                            <div
+                              className="history-discount-badge"
+                              title="İndirimli sipariş"
+                            >
+                              %
+                            </div>
+                          ) : null}
+
+                          <div className="history-payment">
+                            <strong>Ödeme:</strong>{" "}
+                            {order.paymentMethod === "cash" ? "Nakit" : "Kart"}
+                          </div>
+
+                          {order.source === "table" && (
+                            <div className="history-source">
+                              <strong>Kaynak:</strong> Masa{" "}
+                              {order.tableId ?? "-"}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {order.loyaltyDiscount && (
+                        <div className="history-note">
+                          <strong>Loyalty:</strong> %10 indirim uygulandı
+                        </div>
+                      )}
+
+                      <div className="history-items">
+                        {order.items.map((item, index) => (
+                          <div key={index} className="history-item-row">
+                            <div>
+                              {item.quantity}x {item.product} -{" "}
+                              {item.price * item.quantity} TL
+                              {(item.complimentary ||
+                                item.modifiers?.length) && (
+                                <div
+                                  style={{ fontSize: "0.85rem", opacity: 0.8 }}
+                                >
+                                  {item.complimentary && (
+                                    <span>Complimentary</span>
+                                  )}
+                                  {item.complimentary && item.modifiers?.length
+                                    ? " · "
+                                    : null}
+                                  {item.modifiers?.length
+                                    ? item.modifiers.join(" · ")
+                                    : null}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {order.note && (
+                        <div className="history-note">
+                          <strong>Not:</strong> {order.note}
+                        </div>
+                      )}
+
+                      <div className="history-footer">
+                        <div>
+                          <strong className="history-total">
+                            Toplam: {order.total} TL
+                          </strong>
+                          {order.discountAmount ? (
+                            <div
+                              style={{ fontSize: "0.9rem", color: "#b56938" }}
+                            >
+                              İndirim: -{order.discountAmount} TL
+                            </div>
+                          ) : null}
+                          {typeof order.dailyRevenueAfter === "number" &&
+                          typeof order.dailyRevenueBefore === "number" ? (
+                            <div className="history-daily-running-total">
+                              Günlük Ciro: {order.dailyRevenueBefore} TL +
+                              {typeof order.dailyRevenueDelta === "number"
+                                ? ` ${order.dailyRevenueDelta}`
+                                : ` ${order.total}`}{" "}
+                              TL = {order.dailyRevenueAfter} TL
+                            </div>
+                          ) : null}
+                        </div>
+                        <button
+                          onClick={() => deleteOrder(order.id)}
+                          className="delete-button"
+                        >
+                          Sil
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="history-pagination">
+                {hasMore ? (
+                  <button
+                    onClick={() => void loadMoreOrders()}
+                    className="history-load-more"
+                    disabled={historyLoading}
                   >
-                    <div className="history-header">
-                      <div className="history-date">
-                        <strong>Tarih:</strong> {order.date}
-                      </div>
-
-                      <div className="history-header-right">
-                        {order.discountAmount ? (
-                          <div
-                            className="history-discount-badge"
-                            title="İndirimli sipariş"
-                          >
-                            %
-                          </div>
-                        ) : null}
-
-                        <div className="history-payment">
-                          <strong>Ödeme:</strong>{" "}
-                          {order.paymentMethod === "cash" ? "Nakit" : "Kart"}
-                        </div>
-
-                        {order.source === "table" && (
-                          <div className="history-source">
-                            <strong>Kaynak:</strong> Masa {order.tableId ?? "-"}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {order.loyaltyDiscount && (
-                      <div className="history-note">
-                        <strong>Loyalty:</strong> %10 indirim uygulandı
-                      </div>
-                    )}
-
-                    <div className="history-items">
-                      {order.items.map((item, index) => (
-                        <div key={index} className="history-item-row">
-                          <div>
-                            {item.quantity}x {item.product} -{" "}
-                            {item.price * item.quantity} TL
-                            {(item.complimentary || item.modifiers?.length) && (
-                              <div
-                                style={{ fontSize: "0.85rem", opacity: 0.8 }}
-                              >
-                                {item.complimentary && (
-                                  <span>Complimentary</span>
-                                )}
-                                {item.complimentary && item.modifiers?.length
-                                  ? " · "
-                                  : null}
-                                {item.modifiers?.length
-                                  ? item.modifiers.join(" · ")
-                                  : null}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-
-                    {order.note && (
-                      <div className="history-note">
-                        <strong>Not:</strong> {order.note}
-                      </div>
-                    )}
-
-                    <div className="history-footer">
-                      <div>
-                        <strong className="history-total">
-                          Toplam: {order.total} TL
-                        </strong>
-                        {order.discountAmount ? (
-                          <div style={{ fontSize: "0.9rem", color: "#b56938" }}>
-                            İndirim: -{order.discountAmount} TL
-                          </div>
-                        ) : null}
-                      </div>
-                      <button
-                        onClick={() => deleteOrder(order.id)}
-                        className="delete-button"
-                      >
-                        Sil
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
+                    {historyLoading ? "Yükleniyor..." : "Daha Fazla Yükle"}
+                  </button>
+                ) : (
+                  <p className="history-end">Tüm siparişler yüklendi.</p>
+                )}
+              </div>
             </div>
           )}
         </>

@@ -1,11 +1,22 @@
-import { useState, useEffect } from "react";
+import { useCallback, useState } from "react";
 import {
     addOrder,
     deleteOrder,
     getDb,
 } from "./firebase";
 import type { FirestoreOrder } from "./firebase";
-import { collection, onSnapshot, orderBy, query } from "@firebase/firestore";
+import {
+    collection,
+    getDocs,
+    limit,
+    orderBy,
+    query,
+    startAfter,
+    type DocumentData,
+    type QueryDocumentSnapshot,
+} from "@firebase/firestore";
+
+const PAGE_SIZE = 25;
 
 interface Order {
     id: string;
@@ -26,96 +37,142 @@ interface Order {
     tableName?: string;
     loyaltyDiscount?: boolean;
     discountAmount?: number;
+    dailyRevenueBefore?: number;
+    dailyRevenueAfter?: number;
+    dailyRevenueDelta?: number;
 }
 
 interface UseFirestoreResult {
     orders: Order[];
     loading: boolean;
     error: string | null;
+    hasMore: boolean;
+    isHistoryLoaded: boolean;
+    loadInitialOrders: () => Promise<void>;
+    loadMoreOrders: () => Promise<void>;
     addNewOrder: (order: Omit<Order, "id">) => Promise<void>;
     removeOrder: (orderId: string) => Promise<void>;
     isFirestoreEnabled: boolean;
 }
+
+const mapFirestoreOrder = (
+    docId: string,
+    order: Omit<FirestoreOrder, "id">
+): Order => {
+    return {
+        id: docId,
+        items: order.items,
+        total: order.total,
+        paymentMethod: order.paymentMethod,
+        date: order.date,
+        ...(order.note && { note: order.note }),
+        ...(order.source && { source: order.source }),
+        ...(order.tableId !== undefined && { tableId: order.tableId }),
+        ...(order.tableName && { tableName: order.tableName }),
+        ...(order.loyaltyDiscount !== undefined && { loyaltyDiscount: order.loyaltyDiscount }),
+        ...(order.discountAmount !== undefined && { discountAmount: order.discountAmount }),
+        ...(order.dailyRevenueBefore !== undefined && { dailyRevenueBefore: order.dailyRevenueBefore }),
+        ...(order.dailyRevenueAfter !== undefined && { dailyRevenueAfter: order.dailyRevenueAfter }),
+        ...(order.dailyRevenueDelta !== undefined && { dailyRevenueDelta: order.dailyRevenueDelta }),
+    };
+};
 
 /**
  * Custom hook to manage orders with Firestore
  * Falls back to localStorage if Firestore is not configured
  */
 export function useFirestoreOrders(
-    localStorageKey: string = "orders"
 ): UseFirestoreResult {
     const [orders, setOrders] = useState<Order[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [hasMore, setHasMore] = useState(true);
+    const [isHistoryLoaded, setIsHistoryLoaded] = useState(false);
+    const [lastDoc, setLastDoc] = useState<QueryDocumentSnapshot<DocumentData> | null>(null);
     const isFirestoreEnabled =
         !!import.meta.env.VITE_FIREBASE_PROJECT_ID &&
         !!import.meta.env.VITE_FIREBASE_API_KEY;
 
-    // Initialize orders on mount
-    useEffect(() => {
-        let unsubscribe: (() => void) | undefined;
+    const loadInitialOrders = useCallback(async () => {
+        try {
+            setError(null);
 
-        const initializeOrders = async () => {
-            try {
-                setLoading(true);
-                setError(null);
-
-                if (isFirestoreEnabled) {
-                    const database = getDb();
-                    const ordersCollection = collection(database, "orders");
-                    const ordersQuery = query(ordersCollection, orderBy("createdAt", "desc"));
-
-                    unsubscribe = onSnapshot(
-                        ordersQuery,
-                        (snapshot) => {
-                            const convertedOrders: Order[] = snapshot.docs.map((docSnap) => {
-                                const order = docSnap.data() as Omit<FirestoreOrder, "id">;
-                                return {
-                                    id: docSnap.id,
-                                    items: order.items,
-                                    total: order.total,
-                                    paymentMethod: order.paymentMethod,
-                                    date: order.date,
-                                    ...(order.note && { note: order.note }),
-                                    ...(order.source && { source: order.source }),
-                                    ...(order.tableId !== undefined && { tableId: order.tableId }),
-                                    ...(order.tableName && { tableName: order.tableName }),
-                                    ...(order.loyaltyDiscount !== undefined && { loyaltyDiscount: order.loyaltyDiscount }),
-                                    ...(order.discountAmount !== undefined && { discountAmount: order.discountAmount }),
-                                };
-                            });
-
-                            setOrders(convertedOrders);
-                            setLoading(false);
-                            console.log(`✅ Loaded ${convertedOrders.length} orders from Firestore`);
-                        },
-                        (firestoreError) => {
-                            console.error("❌ Error loading from Firestore:", firestoreError);
-                            setError("⚠️ Failed to load orders from Firestore. Firestore may not be properly configured in your Firebase project. Please check the browser console.");
-                            setOrders([]);
-                            setLoading(false);
-                        },
-                    );
-                } else {
-                    console.error("❌ Firestore is not configured");
-                    setError("⚠️ Firestore is not configured. Missing VITE_FIREBASE_PROJECT_ID or VITE_FIREBASE_API_KEY environment variables.");
-                    setLoading(false);
-                }
-            } catch (err) {
-                console.error("Error initializing orders:", err);
-                setError("Failed to initialize orders");
-                setLoading(false);
+            if (!isFirestoreEnabled) {
+                throw new Error("Firestore is not configured");
             }
-        };
 
-        void initializeOrders();
+            setLoading(true);
+            const database = getDb();
+            const ordersCollection = collection(database, "orders");
+            const ordersQuery = query(
+                ordersCollection,
+                orderBy("createdAt", "desc"),
+                limit(PAGE_SIZE)
+            );
 
-        return () => {
-            if (unsubscribe) {
-                unsubscribe();
+            const snapshot = await getDocs(ordersQuery);
+            const convertedOrders: Order[] = snapshot.docs.map((docSnap) => {
+                const order = docSnap.data() as Omit<FirestoreOrder, "id">;
+                return mapFirestoreOrder(docSnap.id, order);
+            });
+
+            setOrders(convertedOrders);
+            setLastDoc(snapshot.docs.length > 0 ? snapshot.docs[snapshot.docs.length - 1] : null);
+            setHasMore(snapshot.docs.length === PAGE_SIZE);
+            setIsHistoryLoaded(true);
+            console.log(`✅ Loaded initial ${convertedOrders.length} orders from Firestore`);
+        } catch (err) {
+            console.error("❌ Error loading initial orders from Firestore:", err);
+            const errorMessage = err instanceof Error ? err.message : "Unknown error";
+            setError(`⚠️ Failed to load orders from Firestore: ${errorMessage}`);
+            setOrders([]);
+            setHasMore(false);
+            setIsHistoryLoaded(true);
+        } finally {
+            setLoading(false);
+        }
+    }, [isFirestoreEnabled]);
+
+    const loadMoreOrders = useCallback(async () => {
+        try {
+            if (loading || !hasMore || !lastDoc) {
+                return;
             }
-        };
-    }, [isFirestoreEnabled, localStorageKey]);
+
+            setError(null);
+
+            if (!isFirestoreEnabled) {
+                throw new Error("Firestore is not configured");
+            }
+
+            setLoading(true);
+            const database = getDb();
+            const ordersCollection = collection(database, "orders");
+            const ordersQuery = query(
+                ordersCollection,
+                orderBy("createdAt", "desc"),
+                startAfter(lastDoc),
+                limit(PAGE_SIZE)
+            );
+
+            const snapshot = await getDocs(ordersQuery);
+            const convertedOrders: Order[] = snapshot.docs.map((docSnap) => {
+                const order = docSnap.data() as Omit<FirestoreOrder, "id">;
+                return mapFirestoreOrder(docSnap.id, order);
+            });
+
+            setOrders((previousOrders) => [...previousOrders, ...convertedOrders]);
+            setLastDoc(snapshot.docs.length > 0 ? snapshot.docs[snapshot.docs.length - 1] : lastDoc);
+            setHasMore(snapshot.docs.length === PAGE_SIZE);
+            console.log(`✅ Loaded ${convertedOrders.length} more orders from Firestore`);
+        } catch (err) {
+            console.error("❌ Error loading more orders from Firestore:", err);
+            const errorMessage = err instanceof Error ? err.message : "Unknown error";
+            setError(`⚠️ Failed to load more orders: ${errorMessage}`);
+        } finally {
+            setLoading(false);
+        }
+    }, [hasMore, isFirestoreEnabled, lastDoc, loading]);
 
     const addNewOrder = async (newOrder: Omit<Order, "id">) => {
         try {
@@ -140,23 +197,14 @@ export function useFirestoreOrders(
             };
             const addedOrder = await addOrder(firestoreOrder);
             const convertedOrder: Order = {
-                id: addedOrder.id || "",
-                items: addedOrder.items,
-                total: addedOrder.total,
-                paymentMethod: addedOrder.paymentMethod,
-                date: addedOrder.date,
-                ...(addedOrder.note && { note: addedOrder.note }),
-                ...(addedOrder.source && { source: addedOrder.source }),
-                ...(addedOrder.tableId !== undefined && { tableId: addedOrder.tableId }),
-                ...(addedOrder.tableName && { tableName: addedOrder.tableName }),
-                ...(addedOrder.loyaltyDiscount !== undefined && { loyaltyDiscount: addedOrder.loyaltyDiscount }),
-                ...(addedOrder.discountAmount !== undefined && { discountAmount: addedOrder.discountAmount }),
+                ...mapFirestoreOrder(addedOrder.id || "", addedOrder),
             };
-            setOrders([convertedOrder, ...orders]);
+            setOrders((previousOrders) => [convertedOrder, ...previousOrders]);
             console.log("✅ Order saved to Firestore");
         } catch (err) {
             console.error("Error adding order:", err);
-            setError("Failed to save order to Firestore");
+            const errorMessage = err instanceof Error ? err.message : "Unknown error";
+            setError(`Failed to save order to Firestore: ${errorMessage}`);
             throw err;
         }
     };
@@ -174,8 +222,7 @@ export function useFirestoreOrders(
             console.log("✅ Order deleted from Firestore");
 
             // Remove from local state
-            const updatedOrders = orders.filter((order) => order.id !== orderId);
-            setOrders(updatedOrders);
+            setOrders((previousOrders) => previousOrders.filter((order) => order.id !== orderId));
         } catch (err) {
             console.error("Error deleting order:", err);
             setError("Failed to delete order from Firestore");
@@ -187,6 +234,10 @@ export function useFirestoreOrders(
         orders,
         loading,
         error,
+        hasMore,
+        isHistoryLoaded,
+        loadInitialOrders,
+        loadMoreOrders,
         addNewOrder,
         removeOrder,
         isFirestoreEnabled,

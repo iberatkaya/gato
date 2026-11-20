@@ -11,6 +11,7 @@ import {
     query,
     orderBy,
     where,
+    runTransaction,
     Timestamp,
     type Firestore,
 } from "@firebase/firestore";
@@ -68,6 +69,12 @@ const getMonthlyAggregatesCollection = () => {
     return collection(database, "monthlyAggregates");
 };
 
+// Collection reference for per-order daily revenue transactions
+const getDailyRevenueTransactionsCollection = () => {
+    const database = getDb();
+    return collection(database, "dailyRevenueTransactions");
+};
+
 // Firestore Order interface (matches your Order interface)
 export interface FirestoreOrder {
     id?: string;
@@ -88,6 +95,9 @@ export interface FirestoreOrder {
     tableName?: string;
     loyaltyDiscount?: boolean;
     discountAmount?: number;
+    dailyRevenueBefore?: number;
+    dailyRevenueAfter?: number;
+    dailyRevenueDelta?: number;
     createdAt?: Timestamp;
 }
 
@@ -112,21 +122,52 @@ export interface MonthlyAggregate {
     lastUpdated: Timestamp;
 }
 
+// Revenue transaction record written after each new sale
+export interface DailyRevenueTransaction {
+    id?: string;
+    orderId: string;
+    orderDate: string; // YYYY-MM-DD
+    orderDateTime: string; // YYYY-MM-DD HH:MM
+    deltaRevenue: number;
+    dailyRevenueBefore: number;
+    dailyRevenueAfter: number;
+    paymentMethod: "cash" | "card";
+    createdAt: Timestamp;
+}
+
 /**
  * Add a new order to Firestore and update daily aggregates
  */
 export async function addOrder(order: Omit<FirestoreOrder, "id">) {
     try {
+        console.log("[addOrder] Starting order write", {
+            date: order.date,
+            total: order.total,
+            paymentMethod: order.paymentMethod,
+        });
         const ordersCollection = getOrdersCollection();
         const docRef = await addDoc(ordersCollection, {
             ...order,
             createdAt: Timestamp.now(),
         });
+        console.log("[addOrder] Order document created", { orderId: docRef.id });
 
-        const newOrder = { id: docRef.id, ...order };
+        const newOrder: FirestoreOrder = { id: docRef.id, ...order };
 
-        // Update daily aggregate
-        await updateDailyAggregate(newOrder);
+        // Run analytics writes in background so checkout does not wait on them.
+        void updateDailyAggregateAndLogTransaction(newOrder)
+            .then((revenueSnapshot) => {
+                console.log("[addOrder] Revenue transaction logged", {
+                    orderId: docRef.id,
+                    before: revenueSnapshot.dailyRevenueBefore,
+                    delta: revenueSnapshot.deltaRevenue,
+                    after: revenueSnapshot.dailyRevenueAfter,
+                });
+            })
+            .catch((analyticsError) => {
+                // Keep checkout flow successful even if auxiliary analytics writes fail.
+                console.error("[addOrder] Analytics write failed, order is still saved", analyticsError);
+            });
 
         return newOrder;
     } catch (error) {
@@ -320,6 +361,113 @@ export async function updateDailyAggregate(order: FirestoreOrder): Promise<void>
         console.log(`✅ Updated daily aggregate for ${orderDate}`);
     } catch (error) {
         console.error("Error updating daily aggregate:", error);
+        throw error;
+    }
+}
+
+/**
+ * Update daily aggregate and write a per-order revenue transaction entry.
+ * The transaction entry includes delta and the running daily total after the sale.
+ */
+async function updateDailyAggregateAndLogTransaction(order: FirestoreOrder): Promise<{
+    dailyRevenueBefore: number;
+    dailyRevenueAfter: number;
+    deltaRevenue: number;
+}> {
+    try {
+        if (!order.id) {
+            throw new Error("Order id is required to log revenue transaction");
+        }
+        const orderId = order.id;
+
+        const orderDate = order.date.split(" ")[0]; // YYYY-MM-DD
+        const monthKey = orderDate.substring(0, 7); // YYYY-MM
+        console.log("[revenueTx] Updating daily aggregate", { orderId, orderDate, monthKey, total: order.total });
+        const monthlyAggregatesCollection = getMonthlyAggregatesCollection();
+        const monthDocRef = doc(monthlyAggregatesCollection, monthKey);
+        const revenueTransactionsCollection = getDailyRevenueTransactionsCollection();
+        const revenueTransactionRef = doc(revenueTransactionsCollection);
+        const database = getDb();
+        let result: { dailyRevenueBefore: number; dailyRevenueAfter: number; deltaRevenue: number } | null = null;
+
+        await runTransaction(database, async (transaction) => {
+            const monthDoc = await transaction.get(monthDocRef);
+
+            let monthlyData: Omit<MonthlyAggregate, "id">;
+
+            if (monthDoc.exists()) {
+                monthlyData = monthDoc.data() as Omit<MonthlyAggregate, "id">;
+            } else {
+                monthlyData = {
+                    month: monthKey,
+                    dailyStats: {},
+                    lastUpdated: Timestamp.now(),
+                };
+            }
+
+            const dailyStats = monthlyData.dailyStats[orderDate] || {
+                date: orderDate,
+                totalRevenue: 0,
+                totalOrders: 0,
+                cashRevenue: 0,
+                cashOrders: 0,
+                cardRevenue: 0,
+                cardOrders: 0,
+                itemCounts: {},
+                lastUpdated: Timestamp.now(),
+            };
+
+            const dailyRevenueBefore = dailyStats.totalRevenue;
+
+            dailyStats.totalRevenue += order.total;
+            dailyStats.totalOrders += 1;
+
+            if (order.paymentMethod === "cash") {
+                dailyStats.cashRevenue += order.total;
+                dailyStats.cashOrders += 1;
+            } else {
+                dailyStats.cardRevenue += order.total;
+                dailyStats.cardOrders += 1;
+            }
+
+            order.items.forEach((item) => {
+                dailyStats.itemCounts[item.product] =
+                    (dailyStats.itemCounts[item.product] || 0) + item.quantity;
+            });
+
+            dailyStats.lastUpdated = Timestamp.now();
+
+            monthlyData.dailyStats[orderDate] = dailyStats;
+            monthlyData.lastUpdated = Timestamp.now();
+
+            const revenueTransaction: Omit<DailyRevenueTransaction, "id"> = {
+                orderId,
+                orderDate,
+                orderDateTime: order.date,
+                deltaRevenue: order.total,
+                dailyRevenueBefore,
+                dailyRevenueAfter: dailyStats.totalRevenue,
+                paymentMethod: order.paymentMethod,
+                createdAt: Timestamp.now(),
+            };
+
+            transaction.set(monthDocRef, monthlyData);
+            transaction.set(revenueTransactionRef, revenueTransaction);
+
+            result = {
+                dailyRevenueBefore,
+                dailyRevenueAfter: dailyStats.totalRevenue,
+                deltaRevenue: order.total,
+            };
+        });
+
+        console.log(`✅ Updated daily aggregate and logged revenue transaction for ${orderDate}`);
+        if (!result) {
+            throw new Error("Failed to compute daily revenue snapshot");
+        }
+        return result;
+    } catch (error) {
+        console.error("Error updating daily aggregate and logging transaction:", error);
         throw error;
     }
 }

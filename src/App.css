@@ -436,6 +436,37 @@
   font-size: 0.92rem;
 }
 
+.discount-quick-buttons {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.discount-quick-button {
+  flex: 1;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(30, 63, 42, 0.18);
+  background-color: #f8f8f8;
+  color: #1e3f2a;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.discount-quick-button:hover {
+  background-color: rgba(244, 208, 111, 0.2);
+  border-color: rgba(244, 208, 111, 0.8);
+}
+
+.discount-quick-button.active {
+  background-color: #f4d06f;
+  color: #2d5432;
+  border-color: #f4d06f;
+  box-shadow: 0 2px 8px rgba(244, 208, 111, 0.35);
+}
+
 .discount-input {
   width: 100%;
   padding: 10px 12px;

@@ -46,6 +46,9 @@ function App() {
   const [paymentMethod, setPaymentMethod] = useState<"cash" | "card">("card");
   const [orderNote, setOrderNote] = useState<string>("");
   const [orderDiscount, setOrderDiscount] = useState<number>(0);
+  const [quickDiscountPercent, setQuickDiscountPercent] = useState<
+    15 | 25 | null
+  >(null);
 
   useEffect(() => {
     const timers = productAnimationTimers.current;
@@ -132,12 +135,27 @@ function App() {
     );
   };
 
+  const calculateDiscountAmount = () => {
+    const subtotal = calculateSubtotal();
+
+    if (quickDiscountPercent) {
+      return Math.min(
+        subtotal,
+        Math.round((subtotal * quickDiscountPercent) / 100),
+      );
+    }
+
+    return Math.min(subtotal, Math.max(0, orderDiscount));
+  };
+
   const calculateTotal = () => {
-    return Math.max(0, calculateSubtotal() - orderDiscount);
+    return Math.max(0, calculateSubtotal() - calculateDiscountAmount());
   };
 
   const handleDiscountChange = (value: string) => {
     const sanitizedValue = value.replace(/\D/g, "");
+
+    setQuickDiscountPercent(null);
 
     if (sanitizedValue === "") {
       setOrderDiscount(0);
@@ -150,6 +168,12 @@ function App() {
     }
 
     setOrderDiscount(Math.max(0, parsedValue));
+  };
+
+  const handleQuickDiscount = (percent: 15 | 25) => {
+    setQuickDiscountPercent((previousPercent) =>
+      previousPercent === percent ? null : percent,
+    );
   };
 
   const placeOrder = async () => {
@@ -177,13 +201,16 @@ function App() {
       console.log("Saving order with date and time:", dateTimeStr);
 
       const finalTotal = calculateTotal();
+      const appliedDiscountAmount = calculateDiscountAmount();
       const newOrder: Omit<Order, "id"> = {
         items: [...currentOrder],
         total: finalTotal,
         paymentMethod,
         date: dateTimeStr,
         ...(orderNote.trim() && { note: orderNote.trim() }),
-        ...(orderDiscount > 0 && { discountAmount: orderDiscount }),
+        ...(appliedDiscountAmount > 0 && {
+          discountAmount: appliedDiscountAmount,
+        }),
       };
 
       console.log("Order object:", newOrder);
@@ -191,6 +218,7 @@ function App() {
       setCurrentOrder([]);
       setOrderNote("");
       setOrderDiscount(0);
+      setQuickDiscountPercent(null);
       alert("Sipariş başarıyla kaydedildi!");
     } catch (error) {
       console.error("Error placing order:", error);
@@ -390,12 +418,32 @@ function App() {
                       >
                         İndirim (TL)
                       </label>
+                      <div className="discount-quick-buttons">
+                        <button
+                          type="button"
+                          onClick={() => handleQuickDiscount(15)}
+                          className={`discount-quick-button ${quickDiscountPercent === 15 ? "active" : ""}`}
+                        >
+                          %15
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleQuickDiscount(25)}
+                          className={`discount-quick-button ${quickDiscountPercent === 25 ? "active" : ""}`}
+                        >
+                          %25
+                        </button>
+                      </div>
                       <input
                         id="order-discount"
                         type="text"
                         inputMode="numeric"
                         pattern="[0-9]*"
-                        value={orderDiscount === 0 ? "" : String(orderDiscount)}
+                        value={
+                          calculateDiscountAmount() === 0
+                            ? ""
+                            : String(calculateDiscountAmount())
+                        }
                         onChange={(e) => handleDiscountChange(e.target.value)}
                         className="discount-input"
                         placeholder="0"
@@ -404,7 +452,7 @@ function App() {
 
                     <div className="order-total">
                       <h3>Toplam: {calculateTotal()} TL</h3>
-                      {orderDiscount > 0 && (
+                      {calculateDiscountAmount() > 0 && (
                         <div className="order-strike-total">
                           <span>Eski fiyat</span>
                           <span className="strikethrough">
@@ -412,10 +460,15 @@ function App() {
                           </span>
                         </div>
                       )}
-                      {orderDiscount > 0 && (
+                      {calculateDiscountAmount() > 0 && (
                         <div className="order-discount-total">
-                          <span>İndirim</span>
-                          <span>-{orderDiscount} TL</span>
+                          <span>
+                            İndirim
+                            {quickDiscountPercent
+                              ? ` (%${quickDiscountPercent})`
+                              : ""}
+                          </span>
+                          <span>-{calculateDiscountAmount()} TL</span>
                         </div>
                       )}
                     </div>
